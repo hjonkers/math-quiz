@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>MathSphere AI</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,.1);
+}
+
+h1,h2,h3{
+    text-align:center;
+}
+
+button{
+    border:none;
+    border-radius:12px;
+    padding:15px;
+    width:100%;
+    margin-top:10px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.primary{
+    background:#4c8bf5;
+    color:white;
+}
+
+.level{
+    background:#eef4ff;
+}
+
+.locked{
+    background:#ddd;
+    color:#999;
+}
+
+.option{
+    background:#eef4ff;
+}
+
+.hidden{
+    display:none;
+}
+
+.stats{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:15px;
+    font-weight:bold;
+}
+
+.progress{
+    background:#ddd;
+    height:15px;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progressFill{
+    background:#4c8bf5;
+    width:0%;
+    height:100%;
+}
+
+.correct{
+    background:#28a745 !important;
+    color:white;
+}
+
+.wrong{
+    background:#dc3545 !important;
+    color:white;
+}
+
+.badge{
+    background:gold;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:16px;
+}
+
+.path-item{
+    margin:10px 0;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- START SCREEN -->
+<div id="welcome" class="card">
+
+<h1>🧮 MathSphere AI</h1>
+
+<h3>Learn Maths Like A Game</h3>
+
+<input
+id="studentName"
+placeholder="Enter your name">
+
+<button
+class="primary"
+onclick="startJourney()">
+
+Start Learning
+
+</button>
+
+</div>
+
+<!-- LEARNING PATH -->
+<div id="pathScreen" class="card hidden">
+
+<div class="stats">
+
+<span id="welcomeUser"></span>
+
+<span id="xpDisplay">⭐ 0 XP</span>
+
+</div>
+
+<div style="margin-bottom:15px;text-align:center">
+
+<div id="heartsDisplay">
+❤️❤️❤️❤️❤️
+</div>
+
+</div>
+
+<h2>Perimeter Adventure</h2>
+
+<div id="path"></div>
+
+</div>
+
+<!-- QUIZ -->
+<div id="quizScreen" class="card hidden">
+
+<div class="stats">
+
+<span id="xpTop">⭐ 0 XP</span>
+
+<span id="questionCounter"></span>
+
+</div>
+
+<div style="text-align:center;margin-bottom:10px">
+<div id="quizHearts">❤️❤️❤️❤️❤️</div>
+</div>
+
+<div class="progress">
+
+<div
+class="progressFill"
+id="progressFill">
+</div>
+
+</div>
+
+<h2 id="questionText"></h2>
+
+<div id="options"></div>
+
+</div>
+
+<!-- RESULTS -->
+<div id="resultScreen" class="card hidden">
+
+<h1>🏆 Level Complete</h1>
+
+<h2 id="resultScore"></h2>
+
+<div
+style="
+font-size:60px;
+text-align:center;
+font-weight:bold;
+color:#4c8bf5;
+"
+id="grade">
+</div>
+
+<h3 id="percentage"></h3>
+
+<div class="badge" id="resultBadge"></div>
+
+<button
+class="primary"
+onclick="showPath()">
+Return To Path
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+let student="";
+let hearts=5;
+let xp=0;
+
+let currentLevel=0;
+let currentQuestion=0;
+let score=0;
+
+const levels=[
+
+{
+title:"✅ Level 1 - What Is Perimeter?",
+unlocked:true,
+completed:false
+},
+
+{
+title:"🔒 Level 2 - Squares",
+unlocked:false,
+completed:false
+},
+
+{
+title:"🔒 Level 3 - Rectangles",
+unlocked:false,
+completed:false
+},
+
+{
+title:"🔒 Level 4 - Mixed Shapes",
+unlocked:false,
+completed:false
+},
+
+{
+title:"🏆 Boss Battle",
+unlocked:false,
+completed:false
+}
+
+];
+
+const questions=[
+
+[
+{
+question:"What is perimeter?",
+options:[
+"Area",
+"Distance around shape",
+"Volume",
+"Width"
+],
+answer:1
+},
+
+{
+question:"Perimeter of a square with side 5cm?",
+options:[
+"20cm",
+"15cm",
+"10cm",
+"25cm"
+],
+answer:0
+}
+],
+
+[
+{
+question:"Square side 7cm. Perimeter?",
+options:[
+"21cm",
+"14cm",
+"28cm",
+"35cm"
+],
+answer:2
+},
+
+{
+question:"Square side 3cm. Perimeter?",
+options:[
+"9cm",
+"6cm",
+"12cm",
+"15cm"
+],
+answer:2
+}
+],
+
+[
+{
+question:"Rectangle 4cm x 6cm?",
+options:[
+"20cm",
+"18cm",
+"22cm",
+"24cm"
+],
+answer:0
+},
+
+{
+question:"Rectangle 8cm x 2cm?",
+options:[
+"20cm",
+"18cm",
+"16cm",
+"24cm"
+],
+answer:0
+}
+],
+
+[
+{
+question:"Perimeter of 10cm x 7cm rectangle?",
+options:[
+"34cm",
+"24cm",
+"28cm",
+"30cm"
+],
+answer:0
+},
+
+{
+question:"Rectangle 12cm x 3cm?",
+options:[
+"30cm",
+"36cm",
+"24cm",
+"18cm"
+],
+answer:0
+}
+],
+
+[
+{
+question:"Square side 11cm?",
+options:[
+"44cm",
+"22cm",
+"33cm",
+"55cm"
+],
+answer:0
+},
+
+{
+question:"Rectangle 9cm x 5cm?",
+options:[
+"28cm",
+"30cm",
+"26cm",
+"24cm"
+],
+answer:0
+}
+]
+
+];
+
+function startJourney(){
+
+student =
+document.getElementById(
+"studentName"
+).value;
+
+if(!student){
+
+alert("Enter your name");
+
+return;
+}
+
+document
+.getElementById("welcome")
+.classList.add("hidden");
+
+showPath();
+}
+
+function showPath(){
+
+document
+.getElementById("quizScreen")
+.classList.add("hidden");
+
+document
+.getElementById("resultScreen")
+.classList.add("hidden");
+
+document
+.getElementById("pathScreen")
+.classList.remove("hidden");
+
+document
+.getElementById("welcomeUser")
+.innerHTML=
+"👤 "+student;
+
+document
+.getElementById("xpDisplay")
+.innerHTML=
+"⭐ "+xp+" XP";
+
+document
+.getElementById("heartsDisplay")
+.innerHTML=
+"❤️".repeat(hearts);
+
+let html="";
+
+levels.forEach((l,index)=>{
+
+if(l.unlocked){
+
+html+=`
+<button
+class="level path-item"
+onclick="startLevel(${index})">
+
+${l.completed ? '✅' : '🔵'}
+${l.title}
+
+</button>
+`;
+
+}else{
+
+html+=`
+<button
+class="locked path-item">
+
+${l.title}
+
+</button>
+`;
+
+}
+
+});
+
+document
+.getElementById("path")
+.innerHTML=html;
+
+}
+
+function startLevel(level){
+
+currentLevel=level;
+currentQuestion=0;
+score=0;
+
+document
+.getElementById("pathScreen")
+.classList.add("hidden");
+
+document
+.getElementById("quizScreen")
+.classList.remove("hidden");
+
+loadQuestion();
+
+}
+
+function loadQuestion(){
+
+let q=
+questions[currentLevel][currentQuestion];
+
+document
+.getElementById("xpTop")
+.innerHTML=
+"⭐ "+xp+" XP";
+
+document
+.getElementById("quizHearts")
+.innerHTML=
+"❤️".repeat(hearts);
+
+document
+.getElementById("questionCounter")
+.innerHTML=
+(currentQuestion+1)+"/"+
+questions[currentLevel].length;
+
+document
+.getElementById("questionText")
+.innerHTML=
+q.question;
+
+document
+.getElementById(
+"progressFill"
+).style.width =
+((currentQuestion) /
+questions[currentLevel].length
+*100)+"%";
+
+let html="";
+
+q.options.forEach((o,i)=>{
+
+html+=`
+<button
+class="option"
+onclick="answer(${i},this)">
+
+${o}
+
+</button>
+`;
+
+});
+
+document
+.getElementById("options")
+.innerHTML=
+html;
+
+}
+
+function answer(choice,btn){
+
+let q=
+questions[currentLevel][currentQuestion];
+
+let buttons=
+document.querySelectorAll(".option");
+
+buttons.forEach(
+b=>b.disabled=true
+);
+
+if(choice===q.answer){
+
+btn.classList.add("correct");
+
+score++;
+xp+=10;
+
+}else{
+
+btn.classList.add("wrong");
+
+buttons[q.answer]
+.classList.add("correct");
+
+hearts--;
+
+if(hearts<=0){
+
+alert(
+"💔 Out of Hearts!"
+);
+
+location.reload();
+
+return;
+}
+
+}
+
+setTimeout(()=>{
+
+currentQuestion++;
+
+if(
+currentQuestion <
+questions[currentLevel].length
+){
+
+loadQuestion();
+
+}else{
+
+completeLevel();
+
+}
+
+},1000);
+
+}
+
+function completeLevel(){
+
+levels[currentLevel]
+.completed = true;
+
+if(
+currentLevel+1 <
+levels.length
+){
+
+levels[currentLevel+1]
+.unlocked=true;
+
+}
+
+document
+.getElementById("quizScreen")
+.classList.add("hidden");
+
+document
+.getElementById("resultScreen")
+.classList.remove("hidden");
+
+let total=
+questions[currentLevel].length;
+
+let percent=
+Math.round(
+(score/total)*100
+);
+
+let grade="F";
+
+if(percent>=80)
+grade="A";
+else if(percent>=70)
+grade="B";
+else if(percent>=60)
+grade="C";
+else if(percent>=50)
+grade="D";
+
+document
+.getElementById("resultScore")
+.innerHTML=
+score+" / "+total+" Correct";
+
+document
+.getElementById("percentage")
+.innerHTML=
+percent+"%";
+
+document
+.getElementById("grade")
+.innerHTML=
+grade;
+
+let badge=
+"📚 Keep Practicing";
+
+if(grade==="A")
+badge="🏆 Perimeter Master";
+else if(grade==="B")
+badge="🥈 Perimeter Expert";
+
+document
+.getElementById("resultBadge")
+.innerHTML=
+badge+"<br><br>⭐ XP: "+xp;
+
+}
+
+</script>
+
+</body>
+</html>
