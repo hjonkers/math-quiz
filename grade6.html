@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MathSphere AI</title>
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,.1);
+}
+
+h1,h2,h3{
+    text-align:center;
+    margin-top:0;
+}
+
+button{
+    border:none;
+    border-radius:12px;
+    padding:15px;
+    width:100%;
+    margin-top:10px;
+    cursor:pointer;
+    font-size:16px;
+    font-family:inherit;
+}
+
+.primary{
+    background:#4c8bf5;
+    color:white;
+}
+
+.level{
+    background:#eef4ff;
+    text-align:left;
+}
+
+.locked{
+    background:#ddd;
+    color:#999;
+    text-align:left;
+    cursor:default;
+}
+
+.option{
+    background:#eef4ff;
+    text-align:left;
+}
+
+.option:disabled{
+    opacity:0.7;
+    cursor:default;
+}
+
+.hidden{
+    display:none;
+}
+
+.stats{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:15px;
+    font-weight:bold;
+}
+
+.progress{
+    background:#ddd;
+    height:15px;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progressFill{
+    background:#4c8bf5;
+    width:0%;
+    height:100%;
+    transition:width .3s;
+}
+
+.correct{
+    background:#28a745 !important;
+    color:white;
+}
+
+.wrong{
+    background:#dc3545 !important;
+    color:white;
+}
+
+.badge{
+    background:gold;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+.path-item{
+    margin:10px 0;
+}
+
+.topicGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:15px;
+}
+
+.topicCard{
+    background:#eef4ff;
+    border-radius:16px;
+    padding:16px 10px;
+    text-align:center;
+    cursor:pointer;
+    border:none;
+    font-family:inherit;
+}
+
+.topicCard .icon{
+    font-size:34px;
+    display:block;
+    margin-bottom:6px;
+}
+
+.topicCard .sub{
+    font-size:12px;
+    color:#666;
+    font-weight:normal;
+    display:block;
+    margin-top:4px;
+}
+
+.backBtn{
+    background:none;
+    border:none;
+    color:#4c8bf5;
+    font-weight:bold;
+    width:auto;
+    padding:0;
+    margin:0 0 10px 0;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.explainBox{
+    background:#fff8e1;
+    border-radius:12px;
+    padding:12px 14px;
+    margin-top:12px;
+    font-size:14px;
+    line-height:1.4;
+    display:none;
+}
+
+.learnBtn{
+    background:#eaf7ee;
+    color:#1e7a34;
+    font-weight:bold;
+}
+
+.lessonText{
+    font-size:15px;
+    line-height:1.6;
+    color:#333;
+}
+
+.formulaBox{
+    background:#eef4ff;
+    border-radius:12px;
+    padding:14px;
+    margin:14px 0;
+    text-align:center;
+    font-weight:bold;
+    font-size:17px;
+    color:#2854a3;
+}
+
+.exampleBox{
+    background:#fff8e1;
+    border-radius:12px;
+    padding:14px 16px;
+    margin:14px 0;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.tipBox{
+    background:#eaf7ee;
+    border-radius:12px;
+    padding:12px 16px;
+    margin:14px 0;
+    font-size:13px;
+    line-height:1.5;
+    color:#1e7a34;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- START SCREEN -->
+<div id="welcome" class="card">
+<h1>🧮 MathSphere AI</h1>
+<h3>Learn Grade 6 Maths Like A Game</h3>
+<input id="studentName" placeholder="Enter your name">
+<button class="primary" onclick="startJourney()">Start Learning</button>
+</div>
+
+<!-- TOPIC SELECT -->
+<div id="topicScreen" class="card hidden">
+<div class="stats">
+<span id="welcomeUserTopics"></span>
+<span id="xpDisplayTopics">⭐ 0 XP</span>
+</div>
+<h2>Choose A Topic</h2>
+<div id="topicGrid" class="topicGrid"></div>
+</div>
+
+<!-- LEARNING PATH -->
+<div id="pathScreen" class="card hidden">
+<button class="backBtn" onclick="showTopics()">&larr; All Topics</button>
+<div class="stats">
+<span id="welcomeUser"></span>
+<span id="xpDisplay">⭐ 0 XP</span>
+</div>
+<h2 id="pathTitle"></h2>
+<div id="path"></div>
+</div>
+
+<!-- LEARN / TUTORIAL -->
+<div id="learnScreen" class="card hidden">
+<button class="backBtn" onclick="showPath()">&larr; Back To Levels</button>
+<h2 id="learnTitle"></h2>
+<div class="lessonText" id="learnBody"></div>
+<button class="primary" onclick="showPath()">Start Practicing →</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quizScreen" class="card hidden">
+
+<div class="stats">
+<span id="xpTop">⭐ 0 XP</span>
+<span id="questionCounter"></span>
+</div>
+
+<div style="text-align:center;margin-bottom:10px">
+<div id="quizHearts">❤️❤️❤️❤️❤️</div>
+</div>
+
+<div class="progress">
+<div class="progressFill" id="progressFill"></div>
+</div>
+
+<h2 id="questionText"></h2>
+
+<div id="options"></div>
+
+<div class="explainBox" id="explainBox"></div>
+
+</div>
+
+<!-- RESULTS -->
+<div id="resultScreen" class="card hidden">
+
+<h1 id="resultHeading">🏆 Level Complete</h1>
+
+<h2 id="resultScore"></h2>
+
+<div style="font-size:60px;text-align:center;font-weight:bold;color:#4c8bf5" id="grade"></div>
+
+<h3 id="percentage"></h3>
+
+<div class="badge" id="resultBadge"></div>
+
+<button class="primary" onclick="retryLevel()" id="retryBtn">Try Again</button>
+<button class="level" onclick="showPath()">Back To Levels</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* ---------- helpers ---------- */
+
+function randInt(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function fmt(n){
+    n = Math.round(n*100)/100;
+    return Number.isInteger(n) ? n : n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+}
+
+function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+}
+
+function makeQ(question, correct, distractorVals, unit, explain){
+    let vals = new Set([correct]);
+    for(const d of distractorVals){
+        if(vals.size>=4) break;
+        if(d>0 && !vals.has(d)) vals.add(d);
+    }
+    let tries=0;
+    while(vals.size<4 && tries<40){
+        const delta = randInt(1,15) * (Math.random()<0.5?-1:1);
+        const d = correct+delta;
+        if(d>0 && !vals.has(d)) vals.add(d);
+        tries++;
+    }
+    const arr = shuffle(Array.from(vals));
+    return {
+        question,
+        options: arr.map(v=>fmt(v)+unit),
+        answer: arr.indexOf(correct),
+        explain
+    };
+}
+
+/* ---------- PERIMETER generators ---------- */
+
+function genPerimeterBasic(){
+    const side = randInt(3,15);
+    const correct = side*4;
+    return makeQ(`What is the perimeter of a square with side ${side} cm?`,
+        correct, [side*2, side*3, side*side], ' cm',
+        `Perimeter of a square = 4 × side = 4 × ${side} = ${correct} cm.`);
+}
+
+function genPerimeterRect(){
+    const l = randInt(6,20), w = randInt(3,l-1);
+    const correct = 2*(l+w);
+    return makeQ(`A rectangle is ${l} cm by ${w} cm. What is its perimeter?`,
+        correct, [l*w, l+w, 2*l+w], ' cm',
+        `Perimeter = 2 × (length + width) = 2 × (${l} + ${w}) = ${correct} cm.`);
+}
+
+function genPerimeterComposite(){
+    const n = randInt(5,6);
+    let sides=[];
+    for(let i=0;i<n;i++) sides.push(randInt(2,15));
+    const correct = sides.reduce((a,b)=>a+b,0);
+    return makeQ(`A figure has sides measuring ${sides.join(' cm, ')} cm. What is its perimeter?`,
+        correct, [correct-sides[0], correct+randInt(2,8), correct-randInt(2,6)], ' cm',
+        `Add every side length: ${sides.join(' + ')} = ${correct} cm.`);
+}
+
+function genPerimeterUnits(){
+    const lm = randInt(1,4), wcm = randInt(20,90);
+    const lcm = lm*100;
+    const correct = 2*(lcm+wcm);
+    return makeQ(`A rectangle is ${lm} m long and ${wcm} cm wide. What is its perimeter in cm?`,
+        correct, [2*(lm+wcm), lcm+wcm, 2*(lcm-wcm)], ' cm',
+        `Convert first: ${lm} m = ${lcm} cm. Perimeter = 2 × (${lcm} + ${wcm}) = ${correct} cm.`);
+}
+
+function genPerimeterBoss(){
+    const fns=[genPerimeterBasic,genPerimeterRect,genPerimeterComposite,genPerimeterUnits];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- AREA generators ---------- */
+
+function genAreaRect(){
+    const l = randInt(4,15), w = randInt(3,12);
+    const correct = l*w;
+    return makeQ(`Find the area of a rectangle ${l} cm by ${w} cm.`,
+        correct, [2*(l+w), l+w, correct+w], ' cm²',
+        `Area = length × width = ${l} × ${w} = ${correct} cm².`);
+}
+
+function genAreaSquare(){
+    const side = randInt(3,15);
+    const correct = side*side;
+    return makeQ(`Find the area of a square with side ${side} cm.`,
+        correct, [side*4, side*2, side*3], ' cm²',
+        `Area = side × side = ${side} × ${side} = ${correct} cm².`);
+}
+
+function genAreaFindSide(){
+    const a = randInt(3,12), b = randInt(3,12);
+    const area = a*b;
+    return makeQ(`A rectangle has an area of ${area} cm² and a width of ${b} cm. What is its length?`,
+        a, [area*b, area+b, Math.max(1,area-b)], ' cm',
+        `Length = Area ÷ Width = ${area} ÷ ${b} = ${a} cm.`);
+}
+
+function genAreaPath(){
+    const s = randInt(4,12), p = randInt(1,3);
+    const total = (s+2*p)*(s+2*p);
+    const garden = s*s;
+    const correct = total-garden;
+    return makeQ(`A square garden has sides of ${s} m. A path of width ${p} m is built all around the outside. What is the area of the path?`,
+        correct, [(s+p)*(s+p)-garden, garden+p*p, total], ' m²',
+        `Total area = (${s}+2×${p})² = ${total} m². Garden area = ${s}² = ${garden} m². Path area = ${total} − ${garden} = ${correct} m².`);
+}
+
+function genAreaBoss(){
+    const fns=[genAreaRect,genAreaSquare,genAreaFindSide,genAreaPath];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- VOLUME generators ---------- */
+
+function genVolCube(){
+    const side = randInt(2,9);
+    const correct = side*side*side;
+    return makeQ(`What is the volume of a cube with side ${side} cm?`,
+        correct, [side*6, side*3, side*side], ' cm³',
+        `Volume of a cube = side × side × side = ${side} × ${side} × ${side} = ${correct} cm³.`);
+}
+
+function genVolPrism(){
+    const l = randInt(2,10), w = randInt(2,8), h = randInt(2,8);
+    const correct = l*w*h;
+    return makeQ(`Find the volume of a box ${l} cm × ${w} cm × ${h} cm.`,
+        correct, [l+w+h, 2*(l*w+l*h+w*h), l*w+h], ' cm³',
+        `Volume = length × width × height = ${l} × ${w} × ${h} = ${correct} cm³.`);
+}
+
+function genVolCapacity(){
+    const vol = randInt(20,500);
+    return makeQ(`A container holds ${vol} cm³ of water. How many millilitres (ml) is that?`,
+        vol, [vol*1000, Math.round(vol/10), vol*10], ' ml',
+        `1 cm³ = 1 ml, so ${vol} cm³ = ${vol} ml.`);
+}
+
+function genVolPacking(){
+    const c = randInt(1,3);
+    const l = c*randInt(2,5), w = c*randInt(2,5), h = c*randInt(2,4);
+    const correct = (l/c)*(w/c)*(h/c);
+    return makeQ(`A box measuring ${l} cm × ${w} cm × ${h} cm is packed with cubes of side ${c} cm. How many cubes fit inside?`,
+        correct, [l*w*h, correct+randInt(1,5), Math.max(1,correct-randInt(1,3))], ' cubes',
+        `Number of cubes = (${l}÷${c}) × (${w}÷${c}) × (${h}÷${c}) = ${l/c} × ${w/c} × ${h/c} = ${correct} cubes.`);
+}
+
+function genVolBoss(){
+    const fns=[genVolCube,genVolPrism,genVolCapacity,genVolPacking];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- LENGTH & UNITS generators ---------- */
+
+const upPairs=[{from:'m',to:'cm',factor:100},{from:'cm',to:'mm',factor:10},{from:'km',to:'m',factor:1000}];
+
+function genLenConvertUp(){
+    const p = upPairs[randInt(0,upPairs.length-1)];
+    const value = randInt(2,20);
+    const correct = value*p.factor;
+    return makeQ(`Convert ${value} ${p.from} to ${p.to}.`,
+        correct, [Math.round(value*p.factor/10), value+p.factor, value*p.factor*10], ' '+p.to,
+        `1 ${p.from} = ${p.factor} ${p.to}, so ${value} ${p.from} × ${p.factor} = ${correct} ${p.to}.`);
+}
+
+function genLenConvertDown(){
+    const p = upPairs[randInt(0,upPairs.length-1)];
+    const base = randInt(2,20);
+    const value = base*p.factor;
+    const correct = base;
+    return makeQ(`Convert ${value} ${p.to} to ${p.from}.`,
+        correct, [Math.round(value*p.factor), Math.round(value/10), correct+p.factor], ' '+p.from,
+        `1 ${p.from} = ${p.factor} ${p.to}, so ${value} ${p.to} ÷ ${p.factor} = ${correct} ${p.from}.`);
+}
+
+function genLenAddSub(){
+    const m1 = randInt(1,9), cm1 = m1*100;
+    const cm2 = randInt(50,300), cm3 = randInt(10,cm2-5);
+    const correct = cm1+cm2-cm3;
+    return makeQ(`Calculate in cm: ${m1} m + ${cm2} cm − ${cm3} cm.`,
+        correct, [cm1+cm2+cm3, cm2-cm3, correct+randInt(5,20)], ' cm',
+        `${m1} m = ${cm1} cm. So ${cm1} + ${cm2} − ${cm3} = ${correct} cm.`);
+}
+
+function genLenRound(){
+    const whole = randInt(10,99);
+    const tenths = randInt(1,9);
+    const value = whole + tenths/10;
+    const correct = tenths>=5 ? whole+1 : whole;
+    return makeQ(`Round off ${fmt(value)} cm to the nearest whole centimetre.`,
+        correct, [whole, whole+2, whole-1], ' cm',
+        `${fmt(value)} cm is ${tenths>=5?'more':'less'} than halfway between ${whole} and ${whole+1}, so it rounds to ${correct} cm.`);
+}
+
+function genLenWord(){
+    const speed = randInt(60,120), hours = randInt(2,8);
+    const correct = speed*hours;
+    return makeQ(`A car travels at ${speed} km/h. How far does it travel in ${hours} hours?`,
+        correct, [speed+hours, correct+10, Math.round(correct/2)], ' km',
+        `Distance = speed × time = ${speed} × ${hours} = ${correct} km.`);
+}
+
+function genLenBoss(){
+    const fns=[genLenConvertUp,genLenConvertDown,genLenAddSub,genLenRound,genLenWord];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- topics data ---------- */
+
+const topics=[
+    {
+        id:'perimeter', title:'Perimeter Path', icon:'📏',
+        desc:'Distance around shapes',
+        levels:[
+            {title:'What Is Perimeter?', gen:genPerimeterBasic},
+            {title:'Rectangles', gen:genPerimeterRect},
+            {title:'Composite Shapes', gen:genPerimeterComposite},
+            {title:'Mixed Units', gen:genPerimeterUnits},
+            {title:'Boss Battle', gen:genPerimeterBoss}
+        ]
+    },
+    {
+        id:'area', title:'Area Explorer', icon:'🔲',
+        desc:'Covering 2D space',
+        levels:[
+            {title:'Rectangles', gen:genAreaRect},
+            {title:'Squares', gen:genAreaSquare},
+            {title:'Find A Missing Side', gen:genAreaFindSide},
+            {title:'Garden Paths', gen:genAreaPath},
+            {title:'Boss Battle', gen:genAreaBoss}
+        ]
+    },
+    {
+        id:'volume', title:'Volume Voyage', icon:'📦',
+        desc:'3D space & capacity',
+        levels:[
+            {title:'Cubes', gen:genVolCube},
+            {title:'Rectangular Prisms', gen:genVolPrism},
+            {title:'Volume & Capacity', gen:genVolCapacity},
+            {title:'Packing Boxes', gen:genVolPacking},
+            {title:'Boss Battle', gen:genVolBoss}
+        ]
+    },
+    {
+        id:'length', title:'Length & Units', icon:'📐',
+        desc:'Measuring & converting',
+        levels:[
+            {title:'Converting Up', gen:genLenConvertUp},
+            {title:'Converting Down', gen:genLenConvertDown},
+            {title:'Add & Subtract', gen:genLenAddSub},
+            {title:'Rounding Off', gen:genLenRound},
+            {title:'Boss Battle', gen:genLenBoss}
+        ]
+    }
+];
+
+const tutorials={
+    perimeter:{
+        intro:`<p><b>Perimeter</b> is the total distance all the way around the outside edge of a shape. The prefix "peri-" means "around" — think of walking along every side of a shape and adding up how far you walked.</p>`,
+        formula:`Perimeter of a rectangle = 2 × (length + width)<br>Perimeter of a square = 4 × side`,
+        example:`<b>Example:</b> A rectangle is 8 cm long and 5 cm wide.<br>Perimeter = 2 × (8 + 5) = 2 × 13 = <b>26 cm</b>.<br><br>For a shape with lots of odd-length sides (like an irregular figure), just add every single side length together — that sum is the perimeter.`,
+        tip:`💡 Tip: perimeter is always measured in plain length units (cm, m, km) — never "squared" units. If your answer has a little ² in it, you've calculated area by mistake!`
+    },
+    area:{
+        intro:`<p><b>Area</b> is the amount of flat (two-dimensional) space inside a shape — how much surface it covers. Picture covering the shape completely with 1 cm × 1 cm squares and counting them.</p>`,
+        formula:`Area of a rectangle = length × width<br>Area of a square = side × side`,
+        example:`<b>Example:</b> A rectangle is 8 cm long and 5 cm wide.<br>Area = 8 × 5 = <b>40 cm²</b>.<br><br>Two shapes can have the exact same perimeter but very different areas — and vice versa. They measure completely different things!`,
+        tip:`💡 Tip: area is always in "squared" units (cm², m², km²) because you're covering a flat surface with squares.`
+    },
+    volume:{
+        intro:`<p><b>Volume</b> is how much 3-dimensional space an object takes up — imagine filling it completely with 1 cm × 1 cm × 1 cm cubes and counting them. <b>Capacity</b> is closely related: it's how much an object can hold (like water).</p>`,
+        formula:`Volume of a rectangular box = length × width × height<br>Volume of a cube = side × side × side<br>1 cm³ = 1 ml`,
+        example:`<b>Example:</b> A box is 4 cm long, 3 cm wide and 2 cm high.<br>Volume = 4 × 3 × 2 = <b>24 cm³</b>, which could also hold 24 ml of water.`,
+        tip:`💡 Tip: volume is in "cubed" units (cm³, m³) because you're filling a 3D space, not just covering a flat surface.`
+    },
+    length:{
+        intro:`<p>We measure <b>length</b> using the metric system, which is based on multiples of 10. The key units, from smallest to largest, are: millimetre (mm) → centimetre (cm) → metre (m) → kilometre (km).</p>`,
+        formula:`1 cm = 10 mm &nbsp;|&nbsp; 1 m = 100 cm &nbsp;|&nbsp; 1 km = 1 000 m`,
+        example:`<b>Example:</b> Convert 3 m to cm.<br>Since 1 m = 100 cm, multiply: 3 × 100 = <b>300 cm</b>.<br><br>Going from a <i>bigger</i> unit to a <i>smaller</i> one? Multiply. Going from <i>smaller</i> to <i>bigger</i>? Divide.`,
+        tip:`💡 Tip: always convert everything to the same unit before adding, subtracting or comparing lengths.`
+    }
+};
+
+function showLearn(topicId){
+    currentTopic=topicId;
+    const topic = topics.find(t=>t.id===topicId);
+    const lesson = tutorials[topicId];
+
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.remove("hidden");
+
+    document.getElementById("learnTitle").innerHTML=topic.icon+" "+topic.title;
+    document.getElementById("learnBody").innerHTML=`
+        ${lesson.intro}
+        <div class="formulaBox">${lesson.formula}</div>
+        <div class="exampleBox">${lesson.example}</div>
+        <div class="tipBox">${lesson.tip}</div>
+    `;
+}
+
+const QUESTIONS_PER_LEVEL = 5;
+const PASS_SCORE = 3;
+
+/* ---------- state ---------- */
+
+let student="";
+let xp=0;
+let hearts=5;
+let progress={};
+let currentTopic=null;
+let currentLevel=0;
+let currentQuestion=0;
+let score=0;
+let questions=[];
+
+function defaultProgress(){
+    const p={};
+    topics.forEach(t=>{
+        p[t.id]={
+            unlocked:t.levels.map((l,i)=>i===0),
+            completed:t.levels.map(()=>false)
+        };
+    });
+    return p;
+}
+
+function loadState(){
+    try{
+        const raw=localStorage.getItem('mathsphere_v2');
+        if(raw){
+            const data=JSON.parse(raw);
+            student=data.student||"";
+            xp=data.xp||0;
+            progress=data.progress||defaultProgress();
+            topics.forEach(t=>{ if(!progress[t.id]) progress[t.id]={unlocked:t.levels.map((l,i)=>i===0),completed:t.levels.map(()=>false)}; });
+            return true;
+        }
+    }catch(e){}
+    progress=defaultProgress();
+    return false;
+}
+
+function saveState(){
+    try{
+        localStorage.setItem('mathsphere_v2', JSON.stringify({student,xp,progress}));
+    }catch(e){}
+}
+
+/* ---------- navigation ---------- */
+
+function startJourney(){
+    const nameField=document.getElementById("studentName").value.trim();
+    if(!nameField){
+        alert("Enter your name");
+        return;
+    }
+    student=nameField;
+    saveState();
+    document.getElementById("welcome").classList.add("hidden");
+    showTopics();
+}
+
+function showTopics(){
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("topicScreen").classList.remove("hidden");
+
+    document.getElementById("welcomeUserTopics").innerHTML="👤 "+student;
+    document.getElementById("xpDisplayTopics").innerHTML="⭐ "+xp+" XP";
+
+    let html="";
+    topics.forEach(t=>{
+        const completedCount = progress[t.id].completed.filter(Boolean).length;
+        html+=`
+        <button class="topicCard" onclick="openTopic('${t.id}')">
+            <span class="icon">${t.icon}</span>
+            ${t.title}
+            <span class="sub">${completedCount}/${t.levels.length} levels · ${t.desc}</span>
+        </button>`;
+    });
+    document.getElementById("topicGrid").innerHTML=html;
+}
+
+function openTopic(topicId){
+    currentTopic=topicId;
+    showPath();
+}
+
+function showPath(){
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("topicScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("pathScreen").classList.remove("hidden");
+
+    const topic = topics.find(t=>t.id===currentTopic);
+    document.getElementById("welcomeUser").innerHTML="👤 "+student;
+    document.getElementById("xpDisplay").innerHTML="⭐ "+xp+" XP";
+    document.getElementById("pathTitle").innerHTML=topic.icon+" "+topic.title;
+
+    const p = progress[topic.id];
+    let html=`<button class="level learnBtn path-item" onclick="showLearn('${topic.id}')">📖 Learn This Topic First</button>`;
+    topic.levels.forEach((l,index)=>{
+        if(p.unlocked[index]){
+            html+=`
+            <button class="level path-item" onclick="startLevel(${index})">
+                ${p.completed[index] ? '✅' : '🔵'} Level ${index+1} - ${l.title}
+            </button>`;
+        }else{
+            html+=`
+            <button class="locked path-item">
+                🔒 Level ${index+1} - ${l.title}
+            </button>`;
+        }
+    });
+    document.getElementById("path").innerHTML=html;
+}
+
+/* ---------- quiz flow ---------- */
+
+function startLevel(level){
+    currentLevel=level;
+    currentQuestion=0;
+    score=0;
+    hearts=5;
+
+    const topic = topics.find(t=>t.id===currentTopic);
+    questions=[];
+    for(let i=0;i<QUESTIONS_PER_LEVEL;i++){
+        questions.push(topic.levels[level].gen());
+    }
+
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.remove("hidden");
+
+    loadQuestion();
+}
+
+function retryLevel(){
+    startLevel(currentLevel);
+}
+
+function loadQuestion(){
+    const q = questions[currentQuestion];
+
+    document.getElementById("xpTop").innerHTML="⭐ "+xp+" XP";
+    document.getElementById("quizHearts").innerHTML="❤️".repeat(hearts);
+    document.getElementById("questionCounter").innerHTML=(currentQuestion+1)+"/"+questions.length;
+    document.getElementById("questionText").innerHTML=q.question;
+
+    document.getElementById("progressFill").style.width=((currentQuestion)/questions.length*100)+"%";
+
+    const explainBox = document.getElementById("explainBox");
+    explainBox.style.display="none";
+    explainBox.innerHTML="";
+
+    let html="";
+    q.options.forEach((o,i)=>{
+        html+=`<button class="option" onclick="answer(${i},this)">${o}</button>`;
+    });
+    document.getElementById("options").innerHTML=html;
+}
+
+function answer(choice,btn){
+    const q = questions[currentQuestion];
+    const buttons = document.querySelectorAll(".option");
+    buttons.forEach(b=>b.disabled=true);
+
+    if(choice===q.answer){
+        btn.classList.add("correct");
+        score++;
+        xp+=10;
+    }else{
+        btn.classList.add("wrong");
+        buttons[q.answer].classList.add("correct");
+        hearts--;
+    }
+
+    const explainBox = document.getElementById("explainBox");
+    explainBox.innerHTML="💡 "+q.explain;
+    explainBox.style.display="block";
+
+    document.getElementById("quizHearts").innerHTML="❤️".repeat(Math.max(hearts,0));
+    document.getElementById("xpTop").innerHTML="⭐ "+xp+" XP";
+    saveState();
+
+    if(hearts<=0){
+        setTimeout(()=>{ failLevel(); }, 3500);
+        return;
+    }
+
+    setTimeout(()=>{
+        currentQuestion++;
+        if(currentQuestion<questions.length){
+            loadQuestion();
+        }else{
+            completeLevel();
+        }
+    }, 3500);
+}
+
+function failLevel(){
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
+
+    document.getElementById("resultHeading").innerHTML="💔 Out Of Hearts";
+    document.getElementById("resultScore").innerHTML=score+" / "+questions.length+" Correct";
+    document.getElementById("grade").innerHTML="";
+    document.getElementById("percentage").innerHTML="";
+    document.getElementById("resultBadge").innerHTML="Give it another go — you've got this! 💪<br><br>⭐ XP so far: "+xp;
+    document.getElementById("retryBtn").innerHTML="Try Again";
+}
+
+function completeLevel(){
+    const topic = topics.find(t=>t.id===currentTopic);
+    const total = questions.length;
+    const percent = Math.round((score/total)*100);
+
+    let grade="F";
+    if(percent>=80) grade="A";
+    else if(percent>=70) grade="B";
+    else if(percent>=60) grade="C";
+    else if(percent>=50) grade="D";
+
+    const passed = score>=PASS_SCORE;
+    if(passed){
+        progress[topic.id].completed[currentLevel]=true;
+        if(currentLevel+1<topic.levels.length){
+            progress[topic.id].unlocked[currentLevel+1]=true;
+        }
+    }
+    saveState();
+
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
+
+    document.getElementById("resultHeading").innerHTML = passed ? "🏆 Level Complete" : "📚 Almost There";
+    document.getElementById("resultScore").innerHTML=score+" / "+total+" Correct";
+    document.getElementById("grade").innerHTML=grade;
+    document.getElementById("percentage").innerHTML=percent+"%";
+
+    let badge="📚 Keep Practicing";
+    if(!passed) badge="Score "+PASS_SCORE+"/"+total+" or more to unlock the next level. Try again!";
+    else if(grade==="A") badge="🏆 Topic Master";
+    else if(grade==="B") badge="🥈 Topic Expert";
+    else badge="✅ Level Passed";
+
+    document.getElementById("resultBadge").innerHTML=badge+"<br><br>⭐ XP: "+xp;
+    document.getElementById("retryBtn").innerHTML="Try Again";
+}
+
+/* ---------- init ---------- */
+
+loadState();
+if(student){
+    document.getElementById("studentName").value=student;
+}
+</script>
+
+</body>
+</html>

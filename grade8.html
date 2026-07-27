@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MathSphere AI - Grade 8</title>
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,.1);
+}
+
+h1,h2,h3{
+    text-align:center;
+    margin-top:0;
+}
+
+button{
+    border:none;
+    border-radius:12px;
+    padding:15px;
+    width:100%;
+    margin-top:10px;
+    cursor:pointer;
+    font-size:16px;
+    font-family:inherit;
+}
+
+.primary{
+    background:#8a4cf5;
+    color:white;
+}
+
+.level{
+    background:#f2ecff;
+    text-align:left;
+}
+
+.locked{
+    background:#ddd;
+    color:#999;
+    text-align:left;
+    cursor:default;
+}
+
+.option{
+    background:#f2ecff;
+    text-align:left;
+}
+
+.option:disabled{
+    opacity:0.7;
+    cursor:default;
+}
+
+.hidden{
+    display:none;
+}
+
+.stats{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:15px;
+    font-weight:bold;
+}
+
+.progress{
+    background:#ddd;
+    height:15px;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progressFill{
+    background:#8a4cf5;
+    width:0%;
+    height:100%;
+    transition:width .3s;
+}
+
+.correct{
+    background:#28a745 !important;
+    color:white;
+}
+
+.wrong{
+    background:#dc3545 !important;
+    color:white;
+}
+
+.badge{
+    background:gold;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+.path-item{
+    margin:10px 0;
+}
+
+.topicGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:15px;
+}
+
+.topicCard{
+    background:#f2ecff;
+    border-radius:16px;
+    padding:16px 10px;
+    text-align:center;
+    cursor:pointer;
+    border:none;
+    font-family:inherit;
+}
+
+.topicCard .icon{
+    font-size:34px;
+    display:block;
+    margin-bottom:6px;
+}
+
+.topicCard .sub{
+    font-size:12px;
+    color:#666;
+    font-weight:normal;
+    display:block;
+    margin-top:4px;
+}
+
+.backBtn{
+    background:none;
+    border:none;
+    color:#8a4cf5;
+    font-weight:bold;
+    width:auto;
+    padding:0;
+    margin:0 0 10px 0;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.explainBox{
+    background:#fff8e1;
+    border-radius:12px;
+    padding:12px 14px;
+    margin-top:12px;
+    font-size:14px;
+    line-height:1.4;
+    display:none;
+}
+
+.learnBtn{
+    background:#eaf7ee;
+    color:#1e7a34;
+    font-weight:bold;
+}
+
+.lessonText{
+    font-size:15px;
+    line-height:1.6;
+    color:#333;
+}
+
+.formulaBox{
+    background:#f2ecff;
+    border-radius:12px;
+    padding:14px;
+    margin:14px 0;
+    text-align:center;
+    font-weight:bold;
+    font-size:17px;
+    color:#5b2ca3;
+}
+
+.exampleBox{
+    background:#fff8e1;
+    border-radius:12px;
+    padding:14px 16px;
+    margin:14px 0;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.tipBox{
+    background:#eaf7ee;
+    border-radius:12px;
+    padding:12px 16px;
+    margin:14px 0;
+    font-size:13px;
+    line-height:1.5;
+    color:#1e7a34;
+}
+
+.questionText{
+    font-size:22px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- START SCREEN -->
+<div id="welcome" class="card">
+<h1>🧮 MathSphere AI</h1>
+<h3>Grade 8 Foundations</h3>
+<input id="studentName" placeholder="Enter your name">
+<button class="primary" onclick="startJourney()">Start Learning</button>
+</div>
+
+<!-- TOPIC SELECT -->
+<div id="topicScreen" class="card hidden">
+<div class="stats">
+<span id="welcomeUserTopics"></span>
+<span id="xpDisplayTopics">⭐ 0 XP</span>
+</div>
+<h2>Choose A Topic</h2>
+<div id="topicGrid" class="topicGrid"></div>
+</div>
+
+<!-- LEARNING PATH -->
+<div id="pathScreen" class="card hidden">
+<button class="backBtn" onclick="showTopics()">&larr; All Topics</button>
+<div class="stats">
+<span id="welcomeUser"></span>
+<span id="xpDisplay">⭐ 0 XP</span>
+</div>
+<h2 id="pathTitle"></h2>
+<div id="path"></div>
+</div>
+
+<!-- LEARN / TUTORIAL -->
+<div id="learnScreen" class="card hidden">
+<button class="backBtn" onclick="showPath()">&larr; Back To Levels</button>
+<h2 id="learnTitle"></h2>
+<div class="lessonText" id="learnBody"></div>
+<button class="primary" onclick="showPath()">Start Practicing →</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quizScreen" class="card hidden">
+
+<div class="stats">
+<span id="xpTop">⭐ 0 XP</span>
+<span id="questionCounter"></span>
+</div>
+
+<div style="text-align:center;margin-bottom:10px">
+<div id="quizHearts">❤️❤️❤️❤️❤️</div>
+</div>
+
+<div class="progress">
+<div class="progressFill" id="progressFill"></div>
+</div>
+
+<h2 id="questionText" class="questionText"></h2>
+
+<div id="options"></div>
+
+<div class="explainBox" id="explainBox"></div>
+
+</div>
+
+<!-- RESULTS -->
+<div id="resultScreen" class="card hidden">
+
+<h1 id="resultHeading">🏆 Level Complete</h1>
+
+<h2 id="resultScore"></h2>
+
+<div style="font-size:60px;text-align:center;font-weight:bold;color:#8a4cf5" id="grade"></div>
+
+<h3 id="percentage"></h3>
+
+<div class="badge" id="resultBadge"></div>
+
+<button class="primary" onclick="retryLevel()" id="retryBtn">Try Again</button>
+<button class="level" onclick="showPath()">Back To Levels</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* ---------- helpers ---------- */
+
+function randInt(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function nonZero(min,max){
+    let n=0;
+    while(n===0) n=randInt(min,max);
+    return n;
+}
+
+function wrap(n){
+    return n<0 ? `(${n})` : `${n}`;
+}
+
+function fmt(n){
+    n = Math.round(n*100)/100;
+    return Number.isInteger(n) ? n : n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+}
+
+function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+}
+
+/* makeQ allows negative numbers - important for integers/algebra */
+function makeQ(question, correct, distractorVals, unit, explain){
+    let vals = new Set([correct]);
+    for(const d of distractorVals){
+        if(vals.size>=4) break;
+        if(!vals.has(d)) vals.add(d);
+    }
+    let tries=0;
+    while(vals.size<4 && tries<40){
+        const delta = randInt(1,10) * (Math.random()<0.5?-1:1);
+        const d = correct+delta;
+        if(!vals.has(d)) vals.add(d);
+        tries++;
+    }
+    const arr = shuffle(Array.from(vals));
+    return {
+        question,
+        options: arr.map(v=>fmt(v)+unit),
+        answer: arr.indexOf(correct),
+        explain
+    };
+}
+
+/* ---------- INTEGERS generators ---------- */
+
+function genIntAdd(){
+    const a = randInt(-20,20), b = randInt(-20,20);
+    const correct = a+b;
+    return makeQ(`Calculate: ${wrap(a)} + ${wrap(b)}`,
+        correct, [Math.abs(a)+Math.abs(b), correct*-1, correct+4], '',
+        `${wrap(a)} + ${wrap(b)} = ${correct}. Adding a negative number moves you further left (down) on the number line.`);
+}
+
+function genIntSub(){
+    const a = randInt(-20,20), b = randInt(-20,20);
+    const correct = a-b;
+    return makeQ(`Calculate: ${wrap(a)} − ${wrap(b)}`,
+        correct, [a+b, Math.abs(a)-Math.abs(b), correct*-1], '',
+        `Subtracting a number is the same as adding its opposite: ${wrap(a)} − ${wrap(b)} = ${wrap(a)} + ${wrap(-b)} = ${correct}.`);
+}
+
+function genIntMul(){
+    const a = nonZero(-12,12), b = nonZero(-12,12);
+    const correct = a*b;
+    return makeQ(`Calculate: ${wrap(a)} × ${wrap(b)}`,
+        correct, [Math.abs(correct), correct+a, correct-b], '',
+        `${wrap(a)} × ${wrap(b)} = ${correct}. Same signs (both + or both −) give a positive answer; different signs give a negative answer.`);
+}
+
+function genIntDiv(){
+    const b = nonZero(-12,12);
+    const k = nonZero(-12,12);
+    const a = b*k;
+    const correct = k;
+    return makeQ(`Calculate: ${wrap(a)} ÷ ${wrap(b)}`,
+        correct, [Math.abs(correct), correct+2, correct-2], '',
+        `${wrap(a)} ÷ ${wrap(b)} = ${correct}. Same signs give a positive answer; different signs give a negative answer.`);
+}
+
+function genIntOrder(){
+    const a = randInt(-10,10), b = randInt(-6,6), c = nonZero(-6,6);
+    const correct = a + b*c;
+    return makeQ(`Calculate using the correct order of operations: ${wrap(a)} + ${wrap(b)} × ${wrap(c)}`,
+        correct, [(a+b)*c, a*b+c, correct+5], '',
+        `Multiply first: ${wrap(b)} × ${wrap(c)} = ${b*c}. Then add: ${wrap(a)} + ${wrap(b*c)} = ${correct}. Multiplication always happens before addition.`);
+}
+
+function genIntBoss(){
+    const fns=[genIntAdd,genIntSub,genIntMul,genIntDiv,genIntOrder];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- EXPONENTS generators ---------- */
+
+function genExpBasic(){
+    const base = randInt(2,6), exp = randInt(2,4);
+    const correct = Math.pow(base,exp);
+    return makeQ(`Evaluate: ${base}<sup>${exp}</sup>`,
+        correct, [base*exp, correct+base, Math.pow(base,exp-1)], '',
+        `${base}<sup>${exp}</sup> means ${Array(exp).fill(base).join(' × ')} = ${correct}.`);
+}
+
+function genExpNegBase(){
+    const base = -randInt(2,6), exp = randInt(2,3);
+    const correct = Math.pow(base,exp);
+    return makeQ(`Evaluate: (${base})<sup>${exp}</sup>`,
+        correct, [Math.abs(correct), -Math.abs(correct)+2, correct+4], '',
+        `(${base})<sup>${exp}</sup> = ${Array(exp).fill(`(${base})`).join(' × ')} = ${correct}. A negative base raised to an ${exp%2===0?'even':'odd'} power gives a ${correct>0?'positive':'negative'} answer.`);
+}
+
+function genExpMultiplyLaw(){
+    const base = randInt(2,5), m = randInt(2,4), n = randInt(2,4);
+    const correct = Math.pow(base,m+n);
+    return makeQ(`Evaluate: ${base}<sup>${m}</sup> × ${base}<sup>${n}</sup>`,
+        correct, [Math.pow(base,m*n), Math.pow(base,m)+Math.pow(base,n), Math.pow(base,m+n+1)], '',
+        `When multiplying powers with the same base, add the exponents: ${base}<sup>${m}</sup> × ${base}<sup>${n}</sup> = ${base}<sup>${m+n}</sup> = ${correct}.`);
+}
+
+function genExpDivideLaw(){
+    const base = randInt(2,5), n = randInt(2,3), m = n+randInt(1,3);
+    const correct = Math.pow(base,m-n);
+    return makeQ(`Evaluate: ${base}<sup>${m}</sup> ÷ ${base}<sup>${n}</sup>`,
+        correct, [Math.pow(base,m+n), Math.pow(base,m-n)+base, Math.pow(base,m-n)*2], '',
+        `When dividing powers with the same base, subtract the exponents: ${base}<sup>${m}</sup> ÷ ${base}<sup>${n}</sup> = ${base}<sup>${m-n}</sup> = ${correct}.`);
+}
+
+function genExpBoss(){
+    const fns=[genExpBasic,genExpNegBase,genExpMultiplyLaw,genExpDivideLaw];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- ALGEBRA generators ---------- */
+
+function genAlgSimplify(){
+    const a = randInt(3,9), b = randInt(2,9);
+    const c = randInt(1, Math.min(a+b-1,9));
+    const correct = a+b-c;
+    return makeQ(`Simplify: ${a}x + ${b}x − ${c}x`,
+        correct, [a+b+c, a-b+c, correct+2], 'x',
+        `Combine the like terms: ${a}x + ${b}x = ${a+b}x, then ${a+b}x − ${c}x = ${correct}x.`);
+}
+
+function genAlgSubstitute(){
+    const x = randInt(2,10), a = randInt(2,9), b = randInt(1,15);
+    const correct = a*x+b;
+    return makeQ(`If x = ${x}, evaluate ${a}x + ${b}.`,
+        correct, [a*(x+b), a+x+b, correct+x], '',
+        `Substitute x = ${x}: ${a} × ${x} + ${b} = ${a*x} + ${b} = ${correct}.`);
+}
+
+function genAlgOneStep(){
+    const x = randInt(-15,20), a = randInt(3,20);
+    const result = x+a;
+    const correct = x;
+    return makeQ(`Solve for x: x + ${a} = ${result}`,
+        correct, [result+a, result-a, correct+3], '',
+        `Subtract ${a} from both sides: x = ${result} − ${a} = ${correct}.`);
+}
+
+function genAlgTwoStep(){
+    const x = randInt(-10,15), a = randInt(2,9), b = randInt(1,15);
+    const result = a*x+b;
+    const correct = x;
+    return makeQ(`Solve for x: ${a}x + ${b} = ${result}`,
+        correct, [correct+2, correct-2, result-b], '',
+        `Subtract ${b} from both sides: ${a}x = ${result-b}. Then divide by ${a}: x = ${(result-b)/a} = ${correct}.`);
+}
+
+function genAlgBoss(){
+    const fns=[genAlgSimplify,genAlgSubstitute,genAlgOneStep,genAlgTwoStep];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- topics data ---------- */
+
+const topics=[
+    {
+        id:'integers', title:'Integers', icon:'➕➖',
+        desc:'Positive & negative numbers',
+        levels:[
+            {title:'Adding Integers', gen:genIntAdd},
+            {title:'Subtracting Integers', gen:genIntSub},
+            {title:'Multiplying & Dividing', gen:function(){ return Math.random()<0.5?genIntMul():genIntDiv(); }},
+            {title:'Order Of Operations', gen:genIntOrder},
+            {title:'Boss Battle', gen:genIntBoss}
+        ]
+    },
+    {
+        id:'exponents', title:'Exponents', icon:'⚡',
+        desc:'Powers & the exponent laws',
+        levels:[
+            {title:'Basic Powers', gen:genExpBasic},
+            {title:'Negative Bases', gen:genExpNegBase},
+            {title:'Multiplying Powers', gen:genExpMultiplyLaw},
+            {title:'Dividing Powers', gen:genExpDivideLaw},
+            {title:'Boss Battle', gen:genExpBoss}
+        ]
+    },
+    {
+        id:'algebra', title:'Algebra Basics', icon:'🔤',
+        desc:'Expressions & equations',
+        levels:[
+            {title:'Simplifying Expressions', gen:genAlgSimplify},
+            {title:'Substitution', gen:genAlgSubstitute},
+            {title:'One-Step Equations', gen:genAlgOneStep},
+            {title:'Two-Step Equations', gen:genAlgTwoStep},
+            {title:'Boss Battle', gen:genAlgBoss}
+        ]
+    }
+];
+
+const tutorials={
+    integers:{
+        intro:`<p><b>Integers</b> are whole numbers that can be positive, negative, or zero. Picture a number line: numbers to the right of zero are positive, numbers to the left are negative. The further left a number is, the smaller it is — so −10 is smaller than −2.</p>`,
+        formula:`Same signs → positive answer (× or ÷)<br>Different signs → negative answer (× or ÷)<br>Subtracting = adding the opposite`,
+        example:`<b>Example 1:</b> (−5) + 8 = 3 (start at −5, move 8 steps right).<br><b>Example 2:</b> (−4) − (−7) = (−4) + 7 = 3.<br><b>Example 3:</b> (−3) × (−6) = 18 (same signs → positive). (−3) × 6 = −18 (different signs → negative).`,
+        tip:`💡 Tip: put brackets around negative numbers as you work — it stops sign mistakes. And always do multiplication/division before addition/subtraction (BODMAS).`
+    },
+    exponents:{
+        intro:`<p>An <b>exponent</b> (or power) tells you how many times to multiply a number by itself. In 3<sup>4</sup>, the 3 is the <b>base</b> and the 4 is the <b>exponent</b> — it means 3 × 3 × 3 × 3.</p>`,
+        formula:`a<sup>m</sup> × a<sup>n</sup> = a<sup>(m+n)</sup> &nbsp; (add exponents when multiplying)<br>a<sup>m</sup> ÷ a<sup>n</sup> = a<sup>(m−n)</sup> &nbsp; (subtract exponents when dividing)`,
+        example:`<b>Example:</b> 2<sup>3</sup> × 2<sup>2</sup> = 2<sup>(3+2)</sup> = 2<sup>5</sup> = 32.<br><br><b>Negative bases:</b> (−2)<sup>3</sup> = (−2)×(−2)×(−2) = −8. An even exponent always gives a positive answer; an odd exponent keeps the negative sign.`,
+        tip:`💡 Tip: the exponent laws (adding/subtracting exponents) only work when the base number is exactly the same on both sides.`
+    },
+    algebra:{
+        intro:`<p><b>Algebra</b> uses letters (like x) to stand for unknown numbers. A <b>like term</b> is one with the same letter — 3x and 5x are like terms and can be combined; 3x and 5 are not.</p>`,
+        formula:`To solve an equation: do the <i>same</i> operation to both sides until x is alone.`,
+        example:`<b>Simplifying:</b> 5x + 2x − 3x = 4x.<br><br><b>Solving:</b> x + 7 = 15 → subtract 7 from both sides → x = 8.<br><b>Two steps:</b> 3x + 4 = 19 → subtract 4 from both sides → 3x = 15 → divide both sides by 3 → x = 5.`,
+        tip:`💡 Tip: whatever you do to one side of the equation, you must do to the other side too — that's what keeps it balanced and true.`
+    }
+};
+
+const QUESTIONS_PER_LEVEL = 5;
+const PASS_SCORE = 3;
+
+/* ---------- state ---------- */
+
+let student="";
+let xp=0;
+let hearts=5;
+let progress={};
+let currentTopic=null;
+let currentLevel=0;
+let currentQuestion=0;
+let score=0;
+let questions=[];
+
+function defaultProgress(){
+    const p={};
+    topics.forEach(t=>{
+        p[t.id]={
+            unlocked:t.levels.map((l,i)=>i===0),
+            completed:t.levels.map(()=>false)
+        };
+    });
+    return p;
+}
+
+function loadState(){
+    try{
+        const raw=localStorage.getItem('mathsphere_grade8');
+        if(raw){
+            const data=JSON.parse(raw);
+            student=data.student||"";
+            xp=data.xp||0;
+            progress=data.progress||defaultProgress();
+            topics.forEach(t=>{ if(!progress[t.id]) progress[t.id]={unlocked:t.levels.map((l,i)=>i===0),completed:t.levels.map(()=>false)}; });
+            return true;
+        }
+    }catch(e){}
+    progress=defaultProgress();
+    return false;
+}
+
+function saveState(){
+    try{
+        localStorage.setItem('mathsphere_grade8', JSON.stringify({student,xp,progress}));
+    }catch(e){}
+}
+
+/* ---------- navigation ---------- */
+
+function startJourney(){
+    const nameField=document.getElementById("studentName").value.trim();
+    if(!nameField){
+        alert("Enter your name");
+        return;
+    }
+    student=nameField;
+    saveState();
+    document.getElementById("welcome").classList.add("hidden");
+    showTopics();
+}
+
+function showTopics(){
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("topicScreen").classList.remove("hidden");
+
+    document.getElementById("welcomeUserTopics").innerHTML="👤 "+student;
+    document.getElementById("xpDisplayTopics").innerHTML="⭐ "+xp+" XP";
+
+    let html="";
+    topics.forEach(t=>{
+        const completedCount = progress[t.id].completed.filter(Boolean).length;
+        html+=`
+        <button class="topicCard" onclick="openTopic('${t.id}')">
+            <span class="icon">${t.icon}</span>
+            ${t.title}
+            <span class="sub">${completedCount}/${t.levels.length} levels · ${t.desc}</span>
+        </button>`;
+    });
+    document.getElementById("topicGrid").innerHTML=html;
+}
+
+function openTopic(topicId){
+    currentTopic=topicId;
+    showPath();
+}
+
+function showPath(){
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("topicScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("pathScreen").classList.remove("hidden");
+
+    const topic = topics.find(t=>t.id===currentTopic);
+    document.getElementById("welcomeUser").innerHTML="👤 "+student;
+    document.getElementById("xpDisplay").innerHTML="⭐ "+xp+" XP";
+    document.getElementById("pathTitle").innerHTML=topic.icon+" "+topic.title;
+
+    const p = progress[topic.id];
+    let html=`<button class="level learnBtn path-item" onclick="showLearn('${topic.id}')">📖 Learn This Topic First</button>`;
+    topic.levels.forEach((l,index)=>{
+        if(p.unlocked[index]){
+            html+=`
+            <button class="level path-item" onclick="startLevel(${index})">
+                ${p.completed[index] ? '✅' : '🔵'} Level ${index+1} - ${l.title}
+            </button>`;
+        }else{
+            html+=`
+            <button class="locked path-item">
+                🔒 Level ${index+1} - ${l.title}
+            </button>`;
+        }
+    });
+    document.getElementById("path").innerHTML=html;
+}
+
+function showLearn(topicId){
+    currentTopic=topicId;
+    const topic = topics.find(t=>t.id===topicId);
+    const lesson = tutorials[topicId];
+
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.remove("hidden");
+
+    document.getElementById("learnTitle").innerHTML=topic.icon+" "+topic.title;
+    document.getElementById("learnBody").innerHTML=`
+        ${lesson.intro}
+        <div class="formulaBox">${lesson.formula}</div>
+        <div class="exampleBox">${lesson.example}</div>
+        <div class="tipBox">${lesson.tip}</div>
+    `;
+}
+
+/* ---------- quiz flow ---------- */
+
+function startLevel(level){
+    currentLevel=level;
+    currentQuestion=0;
+    score=0;
+    hearts=5;
+
+    const topic = topics.find(t=>t.id===currentTopic);
+    questions=[];
+    for(let i=0;i<QUESTIONS_PER_LEVEL;i++){
+        questions.push(topic.levels[level].gen());
+    }
+
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.remove("hidden");
+
+    loadQuestion();
+}
+
+function retryLevel(){
+    startLevel(currentLevel);
+}
+
+function loadQuestion(){
+    const q = questions[currentQuestion];
+
+    document.getElementById("xpTop").innerHTML="⭐ "+xp+" XP";
+    document.getElementById("quizHearts").innerHTML="❤️".repeat(hearts);
+    document.getElementById("questionCounter").innerHTML=(currentQuestion+1)+"/"+questions.length;
+    document.getElementById("questionText").innerHTML=q.question;
+
+    document.getElementById("progressFill").style.width=((currentQuestion)/questions.length*100)+"%";
+
+    const explainBox = document.getElementById("explainBox");
+    explainBox.style.display="none";
+    explainBox.innerHTML="";
+
+    let html="";
+    q.options.forEach((o,i)=>{
+        html+=`<button class="option" onclick="answer(${i},this)">${o}</button>`;
+    });
+    document.getElementById("options").innerHTML=html;
+}
+
+function answer(choice,btn){
+    const q = questions[currentQuestion];
+    const buttons = document.querySelectorAll(".option");
+    buttons.forEach(b=>b.disabled=true);
+
+    if(choice===q.answer){
+        btn.classList.add("correct");
+        score++;
+        xp+=10;
+    }else{
+        btn.classList.add("wrong");
+        buttons[q.answer].classList.add("correct");
+        hearts--;
+    }
+
+    const explainBox = document.getElementById("explainBox");
+    explainBox.innerHTML="💡 "+q.explain;
+    explainBox.style.display="block";
+
+    document.getElementById("quizHearts").innerHTML="❤️".repeat(Math.max(hearts,0));
+    document.getElementById("xpTop").innerHTML="⭐ "+xp+" XP";
+    saveState();
+
+    if(hearts<=0){
+        setTimeout(()=>{ failLevel(); }, 3500);
+        return;
+    }
+
+    setTimeout(()=>{
+        currentQuestion++;
+        if(currentQuestion<questions.length){
+            loadQuestion();
+        }else{
+            completeLevel();
+        }
+    }, 3500);
+}
+
+function failLevel(){
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
+
+    document.getElementById("resultHeading").innerHTML="💔 Out Of Hearts";
+    document.getElementById("resultScore").innerHTML=score+" / "+questions.length+" Correct";
+    document.getElementById("grade").innerHTML="";
+    document.getElementById("percentage").innerHTML="";
+    document.getElementById("resultBadge").innerHTML="Give it another go — you've got this! 💪<br><br>⭐ XP so far: "+xp;
+    document.getElementById("retryBtn").innerHTML="Try Again";
+}
+
+function completeLevel(){
+    const topic = topics.find(t=>t.id===currentTopic);
+    const total = questions.length;
+    const percent = Math.round((score/total)*100);
+
+    let grade="F";
+    if(percent>=80) grade="A";
+    else if(percent>=70) grade="B";
+    else if(percent>=60) grade="C";
+    else if(percent>=50) grade="D";
+
+    const passed = score>=PASS_SCORE;
+    if(passed){
+        progress[topic.id].completed[currentLevel]=true;
+        if(currentLevel+1<topic.levels.length){
+            progress[topic.id].unlocked[currentLevel+1]=true;
+        }
+    }
+    saveState();
+
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
+
+    document.getElementById("resultHeading").innerHTML = passed ? "🏆 Level Complete" : "📚 Almost There";
+    document.getElementById("resultScore").innerHTML=score+" / "+total+" Correct";
+    document.getElementById("grade").innerHTML=grade;
+    document.getElementById("percentage").innerHTML=percent+"%";
+
+    let badge="📚 Keep Practicing";
+    if(!passed) badge="Score "+PASS_SCORE+"/"+total+" or more to unlock the next level. Try again!";
+    else if(grade==="A") badge="🏆 Topic Master";
+    else if(grade==="B") badge="🥈 Topic Expert";
+    else badge="✅ Level Passed";
+
+    document.getElementById("resultBadge").innerHTML=badge+"<br><br>⭐ XP: "+xp;
+    document.getElementById("retryBtn").innerHTML="Try Again";
+}
+
+/* ---------- init ---------- */
+
+loadState();
+if(student){
+    document.getElementById("studentName").value=student;
+}
+</script>
+
+</body>
+</html>
