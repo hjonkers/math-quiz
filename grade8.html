@@ -290,6 +290,8 @@ input{
 
 <div class="explainBox" id="explainBox"></div>
 
+<button class="primary" id="continueBtn" onclick="proceed()" style="display:none">Continue →</button>
+
 </div>
 
 <!-- RESULTS -->
@@ -730,6 +732,7 @@ function loadQuestion(){
     const explainBox = document.getElementById("explainBox");
     explainBox.style.display="none";
     explainBox.innerHTML="";
+    document.getElementById("continueBtn").style.display="none";
 
     let html="";
     q.options.forEach((o,i)=>{
@@ -761,19 +764,23 @@ function answer(choice,btn){
     document.getElementById("xpTop").innerHTML="⭐ "+xp+" XP";
     saveState();
 
+    document.getElementById("continueBtn").style.display="block";
+}
+
+function proceed(){
+    document.getElementById("continueBtn").style.display="none";
+
     if(hearts<=0){
-        setTimeout(()=>{ failLevel(); }, 3500);
+        failLevel();
         return;
     }
 
-    setTimeout(()=>{
-        currentQuestion++;
-        if(currentQuestion<questions.length){
-            loadQuestion();
-        }else{
-            completeLevel();
-        }
-    }, 3500);
+    currentQuestion++;
+    if(currentQuestion<questions.length){
+        loadQuestion();
+    }else{
+        completeLevel();
+    }
 }
 
 function failLevel(){
