@@ -178,6 +178,48 @@ input{
     display:none;
 }
 
+.learnBtn{
+    background:#eaf7ee;
+    color:#1e7a34;
+    font-weight:bold;
+}
+
+.lessonText{
+    font-size:15px;
+    line-height:1.6;
+    color:#333;
+}
+
+.formulaBox{
+    background:#eef4ff;
+    border-radius:12px;
+    padding:14px;
+    margin:14px 0;
+    text-align:center;
+    font-weight:bold;
+    font-size:17px;
+    color:#2854a3;
+}
+
+.exampleBox{
+    background:#fff8e1;
+    border-radius:12px;
+    padding:14px 16px;
+    margin:14px 0;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.tipBox{
+    background:#eaf7ee;
+    border-radius:12px;
+    padding:12px 16px;
+    margin:14px 0;
+    font-size:13px;
+    line-height:1.5;
+    color:#1e7a34;
+}
+
 </style>
 </head>
 
@@ -212,6 +254,14 @@ input{
 </div>
 <h2 id="pathTitle"></h2>
 <div id="path"></div>
+</div>
+
+<!-- LEARN / TUTORIAL -->
+<div id="learnScreen" class="card hidden">
+<button class="backBtn" onclick="showPath()">&larr; Back To Levels</button>
+<h2 id="learnTitle"></h2>
+<div class="lessonText" id="learnBody"></div>
+<button class="primary" onclick="showPath()">Start Practicing →</button>
 </div>
 
 <!-- QUIZ -->
@@ -527,6 +577,50 @@ const topics=[
     }
 ];
 
+const tutorials={
+    perimeter:{
+        intro:`<p><b>Perimeter</b> is the total distance all the way around the outside edge of a shape. The prefix "peri-" means "around" — think of walking along every side of a shape and adding up how far you walked.</p>`,
+        formula:`Perimeter of a rectangle = 2 × (length + width)<br>Perimeter of a square = 4 × side`,
+        example:`<b>Example:</b> A rectangle is 8 cm long and 5 cm wide.<br>Perimeter = 2 × (8 + 5) = 2 × 13 = <b>26 cm</b>.<br><br>For a shape with lots of odd-length sides (like an irregular figure), just add every single side length together — that sum is the perimeter.`,
+        tip:`💡 Tip: perimeter is always measured in plain length units (cm, m, km) — never "squared" units. If your answer has a little ² in it, you've calculated area by mistake!`
+    },
+    area:{
+        intro:`<p><b>Area</b> is the amount of flat (two-dimensional) space inside a shape — how much surface it covers. Picture covering the shape completely with 1 cm × 1 cm squares and counting them.</p>`,
+        formula:`Area of a rectangle = length × width<br>Area of a square = side × side`,
+        example:`<b>Example:</b> A rectangle is 8 cm long and 5 cm wide.<br>Area = 8 × 5 = <b>40 cm²</b>.<br><br>Two shapes can have the exact same perimeter but very different areas — and vice versa. They measure completely different things!`,
+        tip:`💡 Tip: area is always in "squared" units (cm², m², km²) because you're covering a flat surface with squares.`
+    },
+    volume:{
+        intro:`<p><b>Volume</b> is how much 3-dimensional space an object takes up — imagine filling it completely with 1 cm × 1 cm × 1 cm cubes and counting them. <b>Capacity</b> is closely related: it's how much an object can hold (like water).</p>`,
+        formula:`Volume of a rectangular box = length × width × height<br>Volume of a cube = side × side × side<br>1 cm³ = 1 ml`,
+        example:`<b>Example:</b> A box is 4 cm long, 3 cm wide and 2 cm high.<br>Volume = 4 × 3 × 2 = <b>24 cm³</b>, which could also hold 24 ml of water.`,
+        tip:`💡 Tip: volume is in "cubed" units (cm³, m³) because you're filling a 3D space, not just covering a flat surface.`
+    },
+    length:{
+        intro:`<p>We measure <b>length</b> using the metric system, which is based on multiples of 10. The key units, from smallest to largest, are: millimetre (mm) → centimetre (cm) → metre (m) → kilometre (km).</p>`,
+        formula:`1 cm = 10 mm &nbsp;|&nbsp; 1 m = 100 cm &nbsp;|&nbsp; 1 km = 1 000 m`,
+        example:`<b>Example:</b> Convert 3 m to cm.<br>Since 1 m = 100 cm, multiply: 3 × 100 = <b>300 cm</b>.<br><br>Going from a <i>bigger</i> unit to a <i>smaller</i> one? Multiply. Going from <i>smaller</i> to <i>bigger</i>? Divide.`,
+        tip:`💡 Tip: always convert everything to the same unit before adding, subtracting or comparing lengths.`
+    }
+};
+
+function showLearn(topicId){
+    currentTopic=topicId;
+    const topic = topics.find(t=>t.id===topicId);
+    const lesson = tutorials[topicId];
+
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.remove("hidden");
+
+    document.getElementById("learnTitle").innerHTML=topic.icon+" "+topic.title;
+    document.getElementById("learnBody").innerHTML=`
+        ${lesson.intro}
+        <div class="formulaBox">${lesson.formula}</div>
+        <div class="exampleBox">${lesson.example}</div>
+        <div class="tipBox">${lesson.tip}</div>
+    `;
+}
+
 const QUESTIONS_PER_LEVEL = 5;
 const PASS_SCORE = 3;
 
@@ -593,6 +687,7 @@ function showTopics(){
     document.getElementById("pathScreen").classList.add("hidden");
     document.getElementById("quizScreen").classList.add("hidden");
     document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
     document.getElementById("topicScreen").classList.remove("hidden");
 
     document.getElementById("welcomeUserTopics").innerHTML="👤 "+student;
@@ -620,6 +715,7 @@ function showPath(){
     document.getElementById("quizScreen").classList.add("hidden");
     document.getElementById("resultScreen").classList.add("hidden");
     document.getElementById("topicScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
     document.getElementById("pathScreen").classList.remove("hidden");
 
     const topic = topics.find(t=>t.id===currentTopic);
@@ -628,7 +724,7 @@ function showPath(){
     document.getElementById("pathTitle").innerHTML=topic.icon+" "+topic.title;
 
     const p = progress[topic.id];
-    let html="";
+    let html=`<button class="level learnBtn path-item" onclick="showLearn('${topic.id}')">📖 Learn This Topic First</button>`;
     topic.levels.forEach((l,index)=>{
         if(p.unlocked[index]){
             html+=`
@@ -660,6 +756,7 @@ function startLevel(level){
     }
 
     document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
     document.getElementById("quizScreen").classList.remove("hidden");
 
     loadQuestion();
