@@ -247,6 +247,44 @@ input{
 </div>
 <h2>Choose A Topic</h2>
 <div id="topicGrid" class="topicGrid"></div>
+<button class="primary" style="margin-top:16px" onclick="showExamInfo()">📝 Take A Mock Exam</button>
+</div>
+
+<!-- EXAM INFO -->
+<div id="examInfoScreen" class="card hidden">
+<button class="backBtn" onclick="showTopics()">&larr; All Topics</button>
+<h2>📝 Mock Exam</h2>
+<div class="lessonText">
+<p>This mock exam mixes questions from every topic — just like a real test.</p>
+<ul>
+<li><b>15 questions</b> covering all topics</li>
+<li><b>20 minutes</b> on the clock</li>
+<li>No hints during the exam — you'll see full explanations in the review afterwards</li>
+</ul>
+</div>
+<button class="primary" onclick="startExam()">Start Mock Exam</button>
+</div>
+
+<!-- EXAM -->
+<div id="examScreen" class="card hidden">
+<div class="stats">
+<span id="examTimer">⏱ 20:00</span>
+<span id="examCounter"></span>
+</div>
+<div class="progress"><div class="progressFill" id="examProgressFill"></div></div>
+<h2 id="examQuestionText" class="questionText"></h2>
+<div id="examOptions"></div>
+</div>
+
+<!-- EXAM RESULTS -->
+<div id="examResultScreen" class="card hidden">
+<h1>📝 Mock Exam Results</h1>
+<h2 id="examResultScore"></h2>
+<h3 id="examPercentage"></h3>
+<div id="examTopicBreakdown"></div>
+<button class="level" onclick="toggleExamReview()" id="examReviewBtn">Review Answers</button>
+<div id="examReview" class="hidden"></div>
+<button class="level" onclick="showTopics()">Back To Topics</button>
 </div>
 
 <!-- LEARNING PATH -->
@@ -314,7 +352,10 @@ input{
 
 </div>
 
+<script src="config.js"></script>
 <script>
+
+const GRADE_LABEL = "Grade 9";
 
 /* ---------- helpers ---------- */
 
@@ -815,6 +856,9 @@ function showTopics(){
     document.getElementById("quizScreen").classList.add("hidden");
     document.getElementById("resultScreen").classList.add("hidden");
     document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("examInfoScreen").classList.add("hidden");
+    document.getElementById("examScreen").classList.add("hidden");
+    document.getElementById("examResultScreen").classList.add("hidden");
     document.getElementById("topicScreen").classList.remove("hidden");
 
     document.getElementById("welcomeUserTopics").innerHTML="👤 "+student;
@@ -843,6 +887,9 @@ function showPath(){
     document.getElementById("resultScreen").classList.add("hidden");
     document.getElementById("topicScreen").classList.add("hidden");
     document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("examInfoScreen").classList.add("hidden");
+    document.getElementById("examScreen").classList.add("hidden");
+    document.getElementById("examResultScreen").classList.add("hidden");
     document.getElementById("pathScreen").classList.remove("hidden");
 
     const topic = topics.find(t=>t.id===currentTopic);
@@ -984,6 +1031,13 @@ function failLevel(){
     document.getElementById("percentage").innerHTML="";
     document.getElementById("resultBadge").innerHTML="Give it another go — you've got this! 💪<br><br>⭐ XP so far: "+xp;
     document.getElementById("retryBtn").innerHTML="Try Again";
+
+    const failTopic = topics.find(t=>t.id===currentTopic);
+    logResult({
+        student, grade:GRADE_LABEL, topic:failTopic.title, level:failTopic.levels[currentLevel].title,
+        mode:'level', result:'ran_out_of_hearts', score, total:questions.length,
+        percent:Math.round((score/questions.length)*100), xp, date:new Date().toISOString()
+    });
 }
 
 function completeLevel(){
@@ -1022,6 +1076,166 @@ function completeLevel(){
 
     document.getElementById("resultBadge").innerHTML=badge+"<br><br>⭐ XP: "+xp;
     document.getElementById("retryBtn").innerHTML="Try Again";
+
+    logResult({
+        student, grade:GRADE_LABEL, topic:topic.title, level:topic.levels[currentLevel].title,
+        mode:'level', result: passed?'passed':'not_passed', score, total, percent, xp,
+        date:new Date().toISOString()
+    });
+}
+
+/* ---------- exam mode ---------- */
+
+const EXAM_LENGTH = 15;
+const EXAM_MINUTES = 20;
+let examQuestions = [];
+let examIndex = 0;
+let examTimerInterval = null;
+let examSecondsLeft = 0;
+
+function showExamInfo(){
+    document.getElementById("topicScreen").classList.add("hidden");
+    document.getElementById("examInfoScreen").classList.remove("hidden");
+}
+
+function buildExamQuestions(){
+    let pool = [];
+    const perTopic = Math.floor(EXAM_LENGTH / topics.length);
+    topics.forEach(t=>{
+        for(let i=0;i<perTopic;i++){
+            const lvl = t.levels[randInt(0, t.levels.length-1)];
+            const q = lvl.gen();
+            q.topicTitle = t.title;
+            pool.push(q);
+        }
+    });
+    while(pool.length < EXAM_LENGTH){
+        const t = topics[randInt(0, topics.length-1)];
+        const lvl = t.levels[randInt(0, t.levels.length-1)];
+        const q = lvl.gen();
+        q.topicTitle = t.title;
+        pool.push(q);
+    }
+    return shuffle(pool).slice(0, EXAM_LENGTH);
+}
+
+function startExam(){
+    examQuestions = buildExamQuestions();
+    examQuestions.forEach(q=>{ q.userAnswer = null; });
+    examIndex = 0;
+    examSecondsLeft = EXAM_MINUTES*60;
+
+    document.getElementById("examInfoScreen").classList.add("hidden");
+    document.getElementById("examScreen").classList.remove("hidden");
+
+    loadExamQuestion();
+
+    clearInterval(examTimerInterval);
+    examTimerInterval = setInterval(()=>{
+        examSecondsLeft--;
+        updateExamTimer();
+        if(examSecondsLeft<=0){
+            clearInterval(examTimerInterval);
+            finishExam();
+        }
+    },1000);
+    updateExamTimer();
+}
+
+function updateExamTimer(){
+    const m = Math.floor(Math.max(examSecondsLeft,0)/60);
+    const s = Math.max(examSecondsLeft,0)%60;
+    document.getElementById("examTimer").innerHTML = "⏱ "+m+":"+(s<10?"0":"")+s;
+}
+
+function loadExamQuestion(){
+    const q = examQuestions[examIndex];
+    document.getElementById("examCounter").innerHTML=(examIndex+1)+"/"+examQuestions.length;
+    document.getElementById("examProgressFill").style.width=(examIndex/examQuestions.length*100)+"%";
+    document.getElementById("examQuestionText").innerHTML=q.question;
+    let html="";
+    q.options.forEach((o,i)=>{
+        html+=`<button class="option" onclick="examAnswer(${i})">${o}</button>`;
+    });
+    document.getElementById("examOptions").innerHTML=html;
+}
+
+function examAnswer(choice){
+    examQuestions[examIndex].userAnswer = choice;
+    const buttons = document.querySelectorAll("#examOptions .option");
+    buttons.forEach(b=>b.disabled=true);
+    buttons[choice].style.opacity="0.6";
+    setTimeout(()=>{
+        examIndex++;
+        if(examIndex<examQuestions.length){
+            loadExamQuestion();
+        }else{
+            clearInterval(examTimerInterval);
+            finishExam();
+        }
+    }, 350);
+}
+
+function finishExam(){
+    document.getElementById("examScreen").classList.add("hidden");
+    document.getElementById("examResultScreen").classList.remove("hidden");
+
+    let correctCount=0;
+    const topicStats={};
+    examQuestions.forEach(q=>{
+        if(!topicStats[q.topicTitle]) topicStats[q.topicTitle]={correct:0,total:0};
+        topicStats[q.topicTitle].total++;
+        if(q.userAnswer===q.answer){ correctCount++; topicStats[q.topicTitle].correct++; xp+=5; }
+    });
+    saveState();
+
+    const total = examQuestions.length;
+    const percent = Math.round((correctCount/total)*100);
+
+    document.getElementById("examResultScore").innerHTML = correctCount+" / "+total+" Correct";
+    document.getElementById("examPercentage").innerHTML = percent+"%";
+
+    let breakdownHtml="<div class='exampleBox'>";
+    Object.keys(topicStats).forEach(t=>{
+        const s=topicStats[t];
+        breakdownHtml += `<b>${t}:</b> ${s.correct}/${s.total}<br>`;
+    });
+    breakdownHtml+="</div>";
+    document.getElementById("examTopicBreakdown").innerHTML=breakdownHtml;
+
+    let reviewHtml="";
+    examQuestions.forEach((q,i)=>{
+        const userAns = q.userAnswer!==null ? q.options[q.userAnswer] : "Not answered";
+        const correctAns = q.options[q.answer];
+        const isRight = q.userAnswer===q.answer;
+        reviewHtml += `<div class="exampleBox" style="text-align:left">
+            <b>${i+1}. ${q.question}</b><br>
+            Your answer: ${isRight?'✅':'❌'} ${userAns}<br>
+            ${!isRight? 'Correct answer: '+correctAns+'<br>' : ''}
+            <span style="font-size:13px">💡 ${q.explain}</span>
+        </div>`;
+    });
+    document.getElementById("examReview").innerHTML=reviewHtml;
+    document.getElementById("examReview").classList.add("hidden");
+    document.getElementById("examReviewBtn").innerHTML="Review Answers";
+
+    const breakdownStr = Object.keys(topicStats).map(t=>`${t}:${topicStats[t].correct}/${topicStats[t].total}`).join(" | ");
+    logResult({
+        student, grade:GRADE_LABEL, topic:'ALL (Mock Exam)', level:'Mock Exam', mode:'exam',
+        score:correctCount, total, percent, xp, breakdown:breakdownStr, date:new Date().toISOString()
+    });
+}
+
+function toggleExamReview(){
+    const el = document.getElementById("examReview");
+    const btn = document.getElementById("examReviewBtn");
+    if(el.classList.contains("hidden")){
+        el.classList.remove("hidden");
+        btn.innerHTML="Hide Answers";
+    }else{
+        el.classList.add("hidden");
+        btn.innerHTML="Review Answers";
+    }
 }
 
 /* ---------- init ---------- */

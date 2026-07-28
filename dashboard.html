@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MathSphere AI - Admin Dashboard</title>
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+    color:#222;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+    margin-bottom:20px;
+}
+
+h1{
+    margin-top:0;
+}
+
+.summaryGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+}
+
+.studentCard{
+    background:#f5f7fb;
+    border-radius:12px;
+    padding:16px;
+}
+
+.studentCard h3{
+    margin:0 0 8px 0;
+}
+
+.studentCard .stat{
+    font-size:14px;
+    color:#444;
+    margin:4px 0;
+}
+
+.studentCard .stat b{
+    color:#111;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+}
+
+th,td{
+    text-align:left;
+    padding:8px 10px;
+    border-bottom:1px solid #eee;
+}
+
+th{
+    background:#f5f7fb;
+    position:sticky;
+    top:0;
+}
+
+.tableWrap{
+    max-height:500px;
+    overflow-y:auto;
+    border-radius:12px;
+    border:1px solid #eee;
+}
+
+.pill{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:bold;
+}
+
+.pillPass{ background:#d4f5dd; color:#1e7a34; }
+.pillFail{ background:#fde2e2; color:#a32020; }
+.pillExam{ background:#e6e0fc; color:#4a2ca3; }
+
+.controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+}
+
+select,input{
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+
+.msg{
+    text-align:center;
+    padding:40px;
+    color:#666;
+}
+
+.refreshBtn{
+    background:#4c8bf5;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:8px 16px;
+    cursor:pointer;
+    font-size:14px;
+}
+
+#lockScreen{
+    max-width:400px;
+    margin:80px auto;
+    text-align:center;
+}
+
+#lockScreen input{
+    width:100%;
+    box-sizing:border-box;
+    margin-bottom:10px;
+}
+
+#lockScreen button{
+    width:100%;
+    padding:12px;
+    background:#4c8bf5;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container" id="lockScreen">
+<div class="card">
+<h1>🔒 Admin Dashboard</h1>
+<p style="color:#666;font-size:14px">Enter the admin passcode to view student results.</p>
+<input type="password" id="passcodeInput" placeholder="Passcode">
+<button onclick="checkPasscode()">Unlock</button>
+</div>
+</div>
+
+<div class="container hidden" id="dashboardScreen">
+
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<h1>📊 MathSphere Dashboard</h1>
+<button class="refreshBtn" onclick="loadData()">↻ Refresh</button>
+</div>
+<p style="color:#666;font-size:14px">Live results pulled from your Google Sheet. Every level attempt and mock exam logs a row here automatically.</p>
+</div>
+
+<div class="card" id="summaryCard">
+<h2>Students</h2>
+<div class="summaryGrid" id="studentGrid"></div>
+</div>
+
+<div class="card">
+<h2>Full Activity Log</h2>
+<div class="controls">
+<select id="studentFilter" onchange="renderTable()"><option value="">All Students</option></select>
+<select id="gradeFilter" onchange="renderTable()"><option value="">All Grades</option></select>
+<select id="modeFilter" onchange="renderTable()">
+<option value="">All Modes</option>
+<option value="level">Practice Levels</option>
+<option value="exam">Mock Exams</option>
+</select>
+</div>
+<div class="tableWrap">
+<table>
+<thead>
+<tr><th>Date</th><th>Student</th><th>Grade</th><th>Topic</th><th>Level/Mode</th><th>Result</th><th>Score</th><th>%</th></tr>
+</thead>
+<tbody id="logTableBody"></tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+<script src="config.js"></script>
+<script>
+
+let allRows = [];
+
+function checkPasscode(){
+    const val = document.getElementById("passcodeInput").value;
+    if(val === MATHSPHERE_ADMIN_PASSCODE){
+        document.getElementById("lockScreen").classList.add("hidden");
+        document.getElementById("dashboardScreen").classList.remove("hidden");
+        loadData();
+    } else {
+        alert("Incorrect passcode.");
+    }
+}
+
+function parseCSV(text){
+    const rows=[];
+    let row=[], field='', inQuotes=false;
+    for(let i=0;i<text.length;i++){
+        const c=text[i];
+        if(inQuotes){
+            if(c==='"'){
+                if(text[i+1]==='"'){ field+='"'; i++; } else { inQuotes=false; }
+            } else field+=c;
+        } else {
+            if(c==='"'){ inQuotes=true; }
+            else if(c===','){ row.push(field); field=''; }
+            else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+            else if(c==='\r'){ /* skip */ }
+            else field+=c;
+        }
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows;
+}
+
+async function loadData(){
+    const body = document.getElementById("logTableBody");
+    body.innerHTML = `<tr><td colspan="8"><div class="msg">Loading…</div></td></tr>`;
+
+    if(!MATHSPHERE_DASHBOARD_CSV_URL || MATHSPHERE_DASHBOARD_CSV_URL.indexOf("PASTE_YOUR")===0){
+        body.innerHTML = `<tr><td colspan="8"><div class="msg">Dashboard isn't connected yet — add MATHSPHERE_DASHBOARD_CSV_URL in config.js (see SETUP.md).</div></td></tr>`;
+        return;
+    }
+
+    try{
+        const res = await fetch(MATHSPHERE_DASHBOARD_CSV_URL, {cache:"no-store"});
+        const text = await res.text();
+        const rows = parseCSV(text);
+        if(rows.length < 2){
+            document.getElementById("studentGrid").innerHTML = `<div class="msg">No results logged yet.</div>`;
+            return;
+        }
+        const headers = rows[0].map(h=>h.trim());
+        allRows = rows.slice(1).filter(r=>r.length>1 && r[1]).map(r=>{
+            const obj={};
+            headers.forEach((h,i)=>{ obj[h]=r[i]!==undefined?r[i]:""; });
+            return obj;
+        });
+        populateFilters();
+        renderSummary();
+        renderTable();
+    }catch(e){
+        document.getElementById("studentGrid").innerHTML = `<div class="msg">Couldn't load the sheet. Double check it's published to the web as CSV, and that the URL in config.js is correct.</div>`;
+    }
+}
+
+function populateFilters(){
+    const students = [...new Set(allRows.map(r=>r.Student).filter(Boolean))].sort();
+    const grades = [...new Set(allRows.map(r=>r.Grade).filter(Boolean))].sort();
+
+    const sSel = document.getElementById("studentFilter");
+    const gSel = document.getElementById("gradeFilter");
+    sSel.innerHTML = `<option value="">All Students</option>` + students.map(s=>`<option value="${s}">${s}</option>`).join('');
+    gSel.innerHTML = `<option value="">All Grades</option>` + grades.map(g=>`<option value="${g}">${g}</option>`).join('');
+}
+
+function renderSummary(){
+    const students = [...new Set(allRows.map(r=>r.Student).filter(Boolean))];
+    let html = "";
+    students.forEach(name=>{
+        const rows = allRows.filter(r=>r.Student===name);
+        const grades = [...new Set(rows.map(r=>r.Grade))].join(', ');
+        const levelRows = rows.filter(r=>r.Mode==='level');
+        const examRows = rows.filter(r=>r.Mode==='exam');
+        const percents = rows.map(r=>parseFloat(r.Percent)).filter(n=>!isNaN(n));
+        const avgPercent = percents.length ? Math.round(percents.reduce((a,b)=>a+b,0)/percents.length) : 0;
+        const xps = rows.map(r=>parseFloat(r.XP)).filter(n=>!isNaN(n));
+        const maxXP = xps.length ? Math.max(...xps) : 0;
+        const dates = rows.map(r=>new Date(r.Timestamp)).filter(d=>!isNaN(d));
+        const lastActive = dates.length ? new Date(Math.max(...dates)).toLocaleDateString() : '—';
+
+        html += `
+        <div class="studentCard">
+            <h3>👤 ${name}</h3>
+            <div class="stat">Grade(s): <b>${grades||'—'}</b></div>
+            <div class="stat">Practice levels attempted: <b>${levelRows.length}</b></div>
+            <div class="stat">Mock exams taken: <b>${examRows.length}</b></div>
+            <div class="stat">Average score: <b>${avgPercent}%</b></div>
+            <div class="stat">Total XP: <b>${maxXP}</b></div>
+            <div class="stat">Last active: <b>${lastActive}</b></div>
+        </div>`;
+    });
+    document.getElementById("studentGrid").innerHTML = html || `<div class="msg">No results logged yet.</div>`;
+}
+
+function renderTable(){
+    const studentF = document.getElementById("studentFilter").value;
+    const gradeF = document.getElementById("gradeFilter").value;
+    const modeF = document.getElementById("modeFilter").value;
+
+    let rows = allRows.slice();
+    if(studentF) rows = rows.filter(r=>r.Student===studentF);
+    if(gradeF) rows = rows.filter(r=>r.Grade===gradeF);
+    if(modeF) rows = rows.filter(r=>r.Mode===modeF);
+
+    rows.sort((a,b)=> new Date(b.Timestamp) - new Date(a.Timestamp));
+    rows = rows.slice(0,200);
+
+    const body = document.getElementById("logTableBody");
+    if(!rows.length){
+        body.innerHTML = `<tr><td colspan="8"><div class="msg">No matching results.</div></td></tr>`;
+        return;
+    }
+
+    body.innerHTML = rows.map(r=>{
+        const date = new Date(r.Timestamp);
+        const dateStr = isNaN(date) ? r.Timestamp : date.toLocaleString();
+        let pill = '';
+        if(r.Mode==='exam') pill = `<span class="pill pillExam">Exam</span>`;
+        else if(r.Result==='passed') pill = `<span class="pill pillPass">Passed</span>`;
+        else pill = `<span class="pill pillFail">${r.Result||'Not Passed'}</span>`;
+        return `<tr>
+            <td>${dateStr}</td>
+            <td>${r.Student}</td>
+            <td>${r.Grade}</td>
+            <td>${r.Topic}</td>
+            <td>${r["Level/Mode"]}</td>
+            <td>${pill}</td>
+            <td>${r.Score}/${r.Total}</td>
+            <td>${r.Percent}%</td>
+        </tr>`;
+    }).join('');
+}
+
+</script>
+
+</body>
+</html>
