@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MathSphere AI - Grade 9</title>
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,.1);
+}
+
+h1,h2,h3{
+    text-align:center;
+    margin-top:0;
+}
+
+button{
+    border:none;
+    border-radius:12px;
+    padding:15px;
+    width:100%;
+    margin-top:10px;
+    cursor:pointer;
+    font-size:16px;
+    font-family:inherit;
+}
+
+.primary{
+    background:#f5824c;
+    color:white;
+}
+
+.level{
+    background:#fff1ea;
+    text-align:left;
+}
+
+.locked{
+    background:#ddd;
+    color:#999;
+    text-align:left;
+    cursor:default;
+}
+
+.option{
+    background:#fff1ea;
+    text-align:left;
+}
+
+.option:disabled{
+    opacity:0.7;
+    cursor:default;
+}
+
+.hidden{
+    display:none;
+}
+
+.stats{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:15px;
+    font-weight:bold;
+}
+
+.progress{
+    background:#ddd;
+    height:15px;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progressFill{
+    background:#f5824c;
+    width:0%;
+    height:100%;
+    transition:width .3s;
+}
+
+.correct{
+    background:#28a745 !important;
+    color:white;
+}
+
+.wrong{
+    background:#dc3545 !important;
+    color:white;
+}
+
+.badge{
+    background:gold;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+.path-item{
+    margin:10px 0;
+}
+
+.topicGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:15px;
+}
+
+.topicCard{
+    background:#fff1ea;
+    border-radius:16px;
+    padding:16px 10px;
+    text-align:center;
+    cursor:pointer;
+    border:none;
+    font-family:inherit;
+}
+
+.topicCard .icon{
+    font-size:34px;
+    display:block;
+    margin-bottom:6px;
+}
+
+.topicCard .sub{
+    font-size:12px;
+    color:#666;
+    font-weight:normal;
+    display:block;
+    margin-top:4px;
+}
+
+.backBtn{
+    background:none;
+    border:none;
+    color:#f5824c;
+    font-weight:bold;
+    width:auto;
+    padding:0;
+    margin:0 0 10px 0;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.explainBox{
+    background:#fff8e1;
+    border-radius:12px;
+    padding:12px 14px;
+    margin-top:12px;
+    font-size:14px;
+    line-height:1.4;
+    display:none;
+}
+
+.learnBtn{
+    background:#eaf7ee;
+    color:#1e7a34;
+    font-weight:bold;
+}
+
+.lessonText{
+    font-size:15px;
+    line-height:1.6;
+    color:#333;
+}
+
+.formulaBox{
+    background:#fff1ea;
+    border-radius:12px;
+    padding:14px;
+    margin:14px 0;
+    text-align:center;
+    font-weight:bold;
+    font-size:17px;
+    color:#a34a1e;
+}
+
+.exampleBox{
+    background:#fff8e1;
+    border-radius:12px;
+    padding:14px 16px;
+    margin:14px 0;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.tipBox{
+    background:#eaf7ee;
+    border-radius:12px;
+    padding:12px 16px;
+    margin:14px 0;
+    font-size:13px;
+    line-height:1.5;
+    color:#1e7a34;
+}
+
+.questionText{
+    font-size:21px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- START SCREEN -->
+<div id="welcome" class="card">
+<h1>🧮 MathSphere AI</h1>
+<h3>Grade 9 · Paper 1</h3>
+<input id="studentName" placeholder="Enter your name">
+<button class="primary" onclick="startJourney()">Start Learning</button>
+</div>
+
+<!-- TOPIC SELECT -->
+<div id="topicScreen" class="card hidden">
+<div class="stats">
+<span id="welcomeUserTopics"></span>
+<span id="xpDisplayTopics">⭐ 0 XP</span>
+</div>
+<h2>Choose A Topic</h2>
+<div id="topicGrid" class="topicGrid"></div>
+</div>
+
+<!-- LEARNING PATH -->
+<div id="pathScreen" class="card hidden">
+<button class="backBtn" onclick="showTopics()">&larr; All Topics</button>
+<div class="stats">
+<span id="welcomeUser"></span>
+<span id="xpDisplay">⭐ 0 XP</span>
+</div>
+<h2 id="pathTitle"></h2>
+<div id="path"></div>
+</div>
+
+<!-- LEARN / TUTORIAL -->
+<div id="learnScreen" class="card hidden">
+<button class="backBtn" onclick="showPath()">&larr; Back To Levels</button>
+<h2 id="learnTitle"></h2>
+<div class="lessonText" id="learnBody"></div>
+<button class="primary" onclick="showPath()">Start Practicing →</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quizScreen" class="card hidden">
+
+<div class="stats">
+<span id="xpTop">⭐ 0 XP</span>
+<span id="questionCounter"></span>
+</div>
+
+<div style="text-align:center;margin-bottom:10px">
+<div id="quizHearts">❤️❤️❤️❤️❤️</div>
+</div>
+
+<div class="progress">
+<div class="progressFill" id="progressFill"></div>
+</div>
+
+<h2 id="questionText" class="questionText"></h2>
+
+<div id="options"></div>
+
+<div class="explainBox" id="explainBox"></div>
+
+<button class="primary" id="continueBtn" onclick="proceed()" style="display:none">Continue →</button>
+
+</div>
+
+<!-- RESULTS -->
+<div id="resultScreen" class="card hidden">
+
+<h1 id="resultHeading">🏆 Level Complete</h1>
+
+<h2 id="resultScore"></h2>
+
+<div style="font-size:60px;text-align:center;font-weight:bold;color:#f5824c" id="grade"></div>
+
+<h3 id="percentage"></h3>
+
+<div class="badge" id="resultBadge"></div>
+
+<button class="primary" onclick="retryLevel()" id="retryBtn">Try Again</button>
+<button class="level" onclick="showPath()">Back To Levels</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* ---------- helpers ---------- */
+
+function randInt(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function nonZero(min,max){
+    let n=0;
+    while(n===0) n=randInt(min,max);
+    return n;
+}
+
+function wrap(n){
+    return n<0 ? `(${n})` : `${n}`;
+}
+
+function signedTerm(c){
+    return c>=0 ? `+ ${c}` : `− ${Math.abs(c)}`;
+}
+
+function fmt(n){
+    n = Math.round(n*100)/100;
+    return Number.isInteger(n) ? n : n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+}
+
+function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+}
+
+function gcd(a,b){
+    a=Math.abs(a); b=Math.abs(b);
+    while(b){ [a,b]=[b,a%b]; }
+    return a||1;
+}
+
+function simplifyFrac(n,d){
+    if(d<0){ n=-n; d=-d; }
+    const g=gcd(n,d);
+    return [n/g,d/g];
+}
+
+function fracStr(n,d){
+    const [sn,sd]=simplifyFrac(n,d);
+    return sd===1 ? `${sn}` : `${sn}/${sd}`;
+}
+
+function uniqueTake(correct, candidates, need){
+    const out=[];
+    for(const c of candidates){
+        if(c!==correct && !out.includes(c)) out.push(c);
+        if(out.length>=need) break;
+    }
+    return out;
+}
+
+/* numeric question builder - allows negative numbers */
+function makeQ(question, correct, distractorVals, unit, explain){
+    let vals = new Set([correct]);
+    for(const d of distractorVals){
+        if(vals.size>=4) break;
+        if(!vals.has(d)) vals.add(d);
+    }
+    let tries=0;
+    while(vals.size<4 && tries<40){
+        const delta = randInt(1,10) * (Math.random()<0.5?-1:1);
+        const d = correct+delta;
+        if(!vals.has(d)) vals.add(d);
+        tries++;
+    }
+    const arr = shuffle(Array.from(vals));
+    return {
+        question,
+        options: arr.map(v=>fmt(v)+unit),
+        answer: arr.indexOf(correct),
+        explain
+    };
+}
+
+/* string-based question builder - for fractions, factorization, expansions etc. */
+function makeQStr(question, correct, distractors, explain){
+    let vals = new Set([correct]);
+    for(const d of distractors){
+        if(vals.size>=4) break;
+        if(d && !vals.has(d)) vals.add(d);
+    }
+    let k=1;
+    while(vals.size<4 && k<20){
+        vals.add(correct+" ");
+        k++;
+    }
+    const arr = shuffle(Array.from(vals));
+    return {
+        question,
+        options: arr,
+        answer: arr.indexOf(correct),
+        explain
+    };
+}
+
+/* ---------- NUMBERS & CALCULATIONS generators ---------- */
+
+function genFracAddSub(){
+    const denoms=[2,3,4,5,6,8];
+    let d1=denoms[randInt(0,denoms.length-1)];
+    let d2=denoms[randInt(0,denoms.length-1)];
+    let n1=randInt(1,d1-1);
+    let n2=randInt(1,d2-1);
+    const op = Math.random()<0.5 ? '+' : '−';
+    const common = (d1*d2)/gcd(d1,d2);
+    let n1c=n1*(common/d1), n2c=n2*(common/d2);
+    if(op==='−' && n1c<n2c){
+        [n1,n2]=[n2,n1]; [d1,d2]=[d2,d1]; [n1c,n2c]=[n2c,n1c];
+    }
+    const resultN = op==='+' ? n1c+n2c : n1c-n2c;
+    const correct = fracStr(resultN, common);
+    const candidates=[
+        fracStr(n1+n2, d1+d2),
+        fracStr(n1c+n2c, common),
+        fracStr(resultN, common+2),
+        fracStr(n1*n2, d1*d2)
+    ];
+    const distractors = uniqueTake(correct, candidates, 3);
+    return makeQStr(`Calculate: ${n1}/${d1} ${op} ${n2}/${d2}`, correct, distractors,
+        `Find a common denominator (${common}): ${n1}/${d1} = ${n1c}/${common} and ${n2}/${d2} = ${n2c}/${common}. Then ${op} the numerators: ${n1c} ${op} ${n2c} = ${resultN}, giving ${correct}.`);
+}
+
+function genDecimal(){
+    let x = randInt(10,200)/10, y = randInt(10,200)/10;
+    const op = Math.random()<0.5?'+':'−';
+    if(op==='−' && x<y){ [x,y]=[y,x]; }
+    const correct = op==='+' ? Math.round((x+y)*100)/100 : Math.round((x-y)*100)/100;
+    return makeQ(`Calculate: ${fmt(x)} ${op} ${fmt(y)}`,
+        correct, [Math.round((x+y+1)*100)/100, Math.round((x-1)*100)/100, Math.round(x*10)/10], '',
+        `${fmt(x)} ${op} ${fmt(y)} = ${fmt(correct)}. Line up the decimal points, then ${op==='+'?'add':'subtract'} as normal.`);
+}
+
+function genExponentLaw2(){
+    const type = randInt(0,2);
+    if(type===0){
+        const base=randInt(2,5), m=randInt(2,3), n=randInt(2,3);
+        const correct = Math.pow(base, m*n);
+        return makeQ(`Evaluate: (${base}<sup>${m}</sup>)<sup>${n}</sup>`,
+            correct, [Math.pow(base,m+n), Math.pow(base,m*n)+base, Math.pow(base,m)*n], '',
+            `When raising a power to a power, multiply the exponents: (${base}<sup>${m}</sup>)<sup>${n}</sup> = ${base}<sup>${m*n}</sup> = ${correct}.`);
+    } else if(type===1){
+        const base=randInt(2,5), n=randInt(1,3);
+        const denom=Math.pow(base,n);
+        const correct = `1/${denom}`;
+        const candidates=[`-1/${denom}`, `1/${denom+base}`, `${denom}`, `-${denom}`];
+        const distractors=uniqueTake(correct,candidates,3);
+        return makeQStr(`Evaluate: ${base}<sup>-${n}</sup>`, correct, distractors,
+            `A negative exponent means "1 over" the positive power: ${base}<sup>-${n}</sup> = 1/${base}<sup>${n}</sup> = 1/${denom}.`);
+    } else {
+        const base=randInt(2,5), m=randInt(2,4), n=randInt(2,4);
+        const correct=Math.pow(base,m+n);
+        return makeQ(`Evaluate: ${base}<sup>${m}</sup> × ${base}<sup>${n}</sup>`,
+            correct, [Math.pow(base,m*n), Math.pow(base,m)+Math.pow(base,n), Math.pow(base,m+n+1)], '',
+            `Add the exponents when multiplying same-base powers: ${base}<sup>${m}</sup> × ${base}<sup>${n}</sup> = ${base}<sup>${m+n}</sup> = ${correct}.`);
+    }
+}
+
+function genSciNotation(){
+    const coeff = randInt(10,99)/10;
+    const exp = randInt(2,6);
+    const normalNumber = Math.round(coeff*Math.pow(10,exp)*100)/100;
+    const correct = `${fmt(coeff)} × 10<sup>${exp}</sup>`;
+    const candidates=[
+        `${fmt(coeff)} × 10<sup>${exp-1}</sup>`,
+        `${fmt(Math.round(coeff*10*10)/10)} × 10<sup>${exp-1}</sup>`,
+        `${fmt(coeff)} × 10<sup>${exp+1}</sup>`
+    ];
+    const distractors = uniqueTake(correct, candidates, 3);
+    return makeQStr(`Write ${fmt(normalNumber)} in scientific notation.`, correct, distractors,
+        `Move the decimal point so only one non-zero digit is before it: ${fmt(coeff)}. Count how many places you moved it (${exp}) — that's the exponent: ${fmt(coeff)} × 10<sup>${exp}</sup>.`);
+}
+
+function genNumbersBoss(){
+    const fns=[genFracAddSub,genDecimal,genExponentLaw2,genSciNotation];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- PATTERNS & FINANCE generators ---------- */
+
+function genNumericPattern(){
+    const a=randInt(1,10), d=randInt(2,9);
+    const terms=[a,a+d,a+2*d,a+3*d];
+    const correct=a+4*d;
+    return makeQ(`Find the next term in the pattern: ${terms.join('; ')}; ...`,
+        correct, [correct+d, correct-d, terms[3]+terms[2]], '',
+        `The pattern increases by ${d} each time. Next term = ${terms[3]} + ${d} = ${correct}.`);
+}
+
+function genGeometricPattern(){
+    const a=randInt(1,5), r=randInt(2,3);
+    const terms=[a, a*r, a*r*r, a*r*r*r];
+    const correct = terms[3]*r;
+    return makeQ(`Find the next term in the pattern: ${terms.join('; ')}; ...`,
+        correct, [correct+a, terms[3]+(terms[3]-terms[2]), Math.round(correct/r)], '',
+        `Each term is multiplied by ${r} to get the next one. Next term = ${terms[3]} × ${r} = ${correct}.`);
+}
+
+function genSimpleInterest(){
+    const P=randInt(2,20)*100;
+    const r=randInt(2,15);
+    const t=randInt(1,5);
+    const correct=Math.round(P*r*t/100);
+    return makeQ(`Calculate the simple interest earned on R${P} invested at ${r}% per year for ${t} years.`,
+        correct, [Math.round(P*r/100), Math.round(P*(r+t)/100), correct+P], '',
+        `Simple Interest = P × r × t ÷ 100 = ${P} × ${r} × ${t} ÷ 100 = R${correct}.`);
+}
+
+function genCompoundInterest(){
+    const P=randInt(2,10)*100;
+    const r=randInt(2,10);
+    const t=randInt(2,3);
+    const correct=Math.round(P*Math.pow(1+r/100,t));
+    const simpleTotal=Math.round(P*(1+r*t/100));
+    return makeQ(`Calculate the total amount after ${t} years if R${P} is invested at ${r}% per year, compounded annually.`,
+        correct, [simpleTotal, P+r*t, correct+P], '',
+        `Compound Interest formula: A = P × (1 + r/100)<sup>t</sup> = ${P} × (1 + ${r}/100)<sup>${t}</sup> ≈ R${correct}.`);
+}
+
+function genPatternsBoss(){
+    const fns=[genNumericPattern,genGeometricPattern,genSimpleInterest,genCompoundInterest];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- ALGEBRA: EXPRESSIONS & EQUATIONS generators ---------- */
+
+function genSimplifyExpr2(){
+    const a=randInt(3,9), b=randInt(2,9);
+    const c=randInt(1, Math.min(a+b-1,9));
+    const correct=a+b-c;
+    return makeQ(`Simplify: ${a}x² + ${b}x² − ${c}x²`,
+        correct, [a+b+c, a-b+c, correct+2], 'x²',
+        `Combine the like terms (same variable and exponent): ${a}x² + ${b}x² = ${a+b}x², then ${a+b}x² − ${c}x² = ${correct}x².`);
+}
+
+function genBinomialProduct(){
+    const a=randInt(1,9), b=randInt(1,9);
+    const correct = `x² + ${a+b}x + ${a*b}`;
+    const candidates = [
+        `x² + ${a+b}x − ${a*b}`,
+        `x² + ${a*b}x + ${a+b}`,
+        `x² − ${a+b}x + ${a*b}`,
+        `x² + ${a+b+1}x + ${a*b}`
+    ];
+    const distractors = uniqueTake(correct, candidates, 3);
+    return makeQStr(`Expand: (x + ${a})(x + ${b})`, correct, distractors,
+        `Use FOIL: x × x = x², x × ${b} + ${a} × x = ${a+b}x, and ${a} × ${b} = ${a*b}. So (x+${a})(x+${b}) = x² + ${a+b}x + ${a*b}.`);
+}
+
+function genCommonFactor(){
+    const g=randInt(2,6);
+    const p=randInt(2,8), q=randInt(2,8);
+    const t1=g*p, t2=g*q;
+    const correct = `${g}(${p}x + ${q})`;
+    const candidates=[
+        `${g}(${p}x − ${q})`,
+        `${p}(${g}x + ${q})`,
+        `${g*p}(x + ${q})`,
+        `${g}(${p+1}x + ${q})`
+    ];
+    const distractors=uniqueTake(correct,candidates,3);
+    return makeQStr(`Factorize fully: ${t1}x + ${t2}`, correct, distractors,
+        `The highest common factor of ${t1} and ${t2} is ${g}. Divide each term by ${g}: ${t1}x ÷ ${g} = ${p}x and ${t2} ÷ ${g} = ${q}. So ${t1}x + ${t2} = ${g}(${p}x + ${q}).`);
+}
+
+function genSolveEquationMix(){
+    const type=randInt(0,2);
+    if(type===0){
+        const x=randInt(-10,15), a=randInt(2,9), b=randInt(1,15);
+        const result=a*x+b;
+        const correct=x;
+        return makeQ(`Solve for x: ${a}x + ${b} = ${result}`,
+            correct, [correct+2, correct-2, result-b], '',
+            `Subtract ${b} from both sides: ${a}x = ${result-b}. Divide by ${a}: x = ${correct}.`);
+    } else if(type===1){
+        const x=randInt(2,12);
+        const k=x*x;
+        const correct=x;
+        return makeQ(`Solve for x (give the positive value): x² = ${k}`,
+            correct, [correct+1, correct-1, Math.round(k/2)], '',
+            `Take the square root of both sides: x = √${k} = ${correct} (there's also a negative solution, −${correct}, but we want the positive one here).`);
+    } else {
+        const base=randInt(2,5), x=randInt(2,5);
+        const result=Math.pow(base,x);
+        const correct=x;
+        return makeQ(`Solve for x: ${base}<sup>x</sup> = ${result}`,
+            correct, [correct+1, correct-1, base], '',
+            `Write ${result} as a power of ${base}: ${result} = ${base}<sup>${correct}</sup>, so x = ${correct}.`);
+    }
+}
+
+function genAlgebra9Boss(){
+    const fns=[genSimplifyExpr2,genBinomialProduct,genCommonFactor,genSolveEquationMix];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- GRAPHS generators ---------- */
+
+function genGradient(){
+    const x1=randInt(-5,5);
+    const x2=x1+randInt(1,6)*(Math.random()<0.5?1:-1);
+    let m=randInt(-5,5); if(m===0) m=2;
+    const y1=randInt(-10,10);
+    const y2=y1+m*(x2-x1);
+    const correct=m;
+    return makeQ(`Find the gradient of the line through (${x1}; ${y1}) and (${x2}; ${y2}).`,
+        correct, [correct+1, correct-1, -correct], '',
+        `Gradient = (y₂ − y₁) ÷ (x₂ − x₁) = (${y2} − ${y1}) ÷ (${x2} − ${x1}) = ${y2-y1} ÷ ${x2-x1} = ${correct}.`);
+}
+
+function genGradientIntercept(){
+    let m=randInt(-6,6); if(m===0) m=2;
+    const c=randInt(-10,10);
+    const eqStr = `y = ${m}x ${signedTerm(c)}`;
+    if(Math.random()<0.5){
+        return makeQ(`In the equation ${eqStr}, what is the gradient?`,
+            m, [c, m+1, -m], '',
+            `In the form y = mx + c, m is the gradient. Here m = ${m}.`);
+    } else {
+        return makeQ(`In the equation ${eqStr}, what is the y-intercept?`,
+            c, [m, c+1, -c], '',
+            `In the form y = mx + c, c is the y-intercept. Here c = ${c}.`);
+    }
+}
+
+function genFindIntercept(){
+    let m=randInt(-5,5); if(m===0) m=2;
+    const x1=randInt(-8,8), y1=randInt(-10,10);
+    const correct = y1-m*x1;
+    return makeQ(`A line has a gradient of ${m} and passes through (${x1}; ${y1}). What is its y-intercept?`,
+        correct, [correct+m, correct-m, y1], '',
+        `Use y = mx + c and solve for c: ${y1} = ${m}(${x1}) + c, so c = ${y1} − ${m*x1} = ${correct}.`);
+}
+
+function genEvalFunction(){
+    let m=randInt(-6,6); if(m===0) m=3;
+    const c=randInt(-10,10), x=randInt(-6,6);
+    const correct = m*x+c;
+    const eqStr = `y = ${m}x ${signedTerm(c)}`;
+    return makeQ(`If ${eqStr}, find y when x = ${x}.`,
+        correct, [correct+m, correct-c, m+x+c], '',
+        `Substitute x = ${x}: y = ${m}(${x}) ${signedTerm(c)} = ${m*x} ${signedTerm(c)} = ${correct}.`);
+}
+
+function genGraphsBoss(){
+    const fns=[genGradient,genGradientIntercept,genFindIntercept,genEvalFunction];
+    return fns[randInt(0,fns.length-1)]();
+}
+
+/* ---------- topics data ---------- */
+
+const topics=[
+    {
+        id:'numbers', title:'Numbers & Calculations', icon:'🔢',
+        desc:'Fractions, decimals & exponents',
+        levels:[
+            {title:'Fractions', gen:genFracAddSub},
+            {title:'Decimals', gen:genDecimal},
+            {title:'Exponent Laws', gen:genExponentLaw2},
+            {title:'Scientific Notation', gen:genSciNotation},
+            {title:'Boss Battle', gen:genNumbersBoss}
+        ]
+    },
+    {
+        id:'patterns', title:'Patterns & Finance', icon:'📈',
+        desc:'Sequences & interest',
+        levels:[
+            {title:'Numeric Patterns', gen:genNumericPattern},
+            {title:'Geometric Patterns', gen:genGeometricPattern},
+            {title:'Simple Interest', gen:genSimpleInterest},
+            {title:'Compound Interest', gen:genCompoundInterest},
+            {title:'Boss Battle', gen:genPatternsBoss}
+        ]
+    },
+    {
+        id:'algebra9', title:'Algebra: Expressions & Equations', icon:'🧮',
+        desc:'Expand, factorize & solve',
+        levels:[
+            {title:'Simplifying Expressions', gen:genSimplifyExpr2},
+            {title:'Binomial Products', gen:genBinomialProduct},
+            {title:'Factorization', gen:genCommonFactor},
+            {title:'Solving Equations', gen:genSolveEquationMix},
+            {title:'Boss Battle', gen:genAlgebra9Boss}
+        ]
+    },
+    {
+        id:'graphs', title:'Graphs', icon:'📉',
+        desc:'Gradients, intercepts & lines',
+        levels:[
+            {title:'Finding Gradient', gen:genGradient},
+            {title:'Gradient & Intercept', gen:genGradientIntercept},
+            {title:'Finding The Intercept', gen:genFindIntercept},
+            {title:'Evaluating Functions', gen:genEvalFunction},
+            {title:'Boss Battle', gen:genGraphsBoss}
+        ]
+    }
+];
+
+const tutorials={
+    numbers:{
+        intro:`<p>This topic covers working confidently with <b>fractions</b>, <b>decimals</b>, and <b>exponents</b> — the building blocks for almost everything else in Grade 9 maths.</p>`,
+        formula:`a<sup>m</sup> × a<sup>n</sup> = a<sup>(m+n)</sup> &nbsp;|&nbsp; (a<sup>m</sup>)<sup>n</sup> = a<sup>(m×n)</sup> &nbsp;|&nbsp; a<sup>-n</sup> = 1/a<sup>n</sup>`,
+        example:`<b>Fractions:</b> 1/4 + 1/3 → common denominator 12 → 3/12 + 4/12 = 7/12.<br><b>Scientific notation:</b> 45 000 = 4.5 × 10<sup>4</sup> (move the decimal point 4 places).`,
+        tip:`💡 Tip: for fractions, always find a common denominator before adding or subtracting — never add the denominators together.`
+    },
+    patterns:{
+        intro:`<p>A <b>pattern</b> (sequence) is a list of numbers that follows a rule. In a <b>numeric (arithmetic)</b> pattern you add the same number each time; in a <b>geometric</b> pattern you multiply by the same number each time. <b>Interest</b> uses similar step-by-step growth — simple interest grows by the same amount each year, compound interest grows by a percentage of the new total each year.</p>`,
+        formula:`Simple Interest: SI = P × r × t ÷ 100<br>Compound Interest: A = P × (1 + r/100)<sup>t</sup>`,
+        example:`<b>Pattern:</b> 3; 7; 11; 15; ... adds 4 each time, so next term = 19.<br><b>Simple Interest:</b> R1000 at 10% for 2 years = 1000 × 10 × 2 ÷ 100 = R200 interest.<br><b>Compound Interest:</b> R1000 at 10% for 2 years = 1000 × 1.1<sup>2</sup> = R1210 total.`,
+        tip:`💡 Tip: compound interest is always a bit more than simple interest over the same period, because you earn interest on your interest too.`
+    },
+    algebra9:{
+        intro:`<p>This topic builds on Grade 8 algebra: simplifying expressions, multiplying out brackets (<b>binomial products</b>), reversing that process (<b>factorization</b>), and solving different types of equations.</p>`,
+        formula:`(x + a)(x + b) = x² + (a+b)x + ab<br>To factorize: find the highest common factor (HCF) and take it out.`,
+        example:`<b>Expand:</b> (x+3)(x+5) = x² + 8x + 15.<br><b>Factorize:</b> 8x + 12 → HCF is 4 → 4(2x + 3).<br><b>Solve x² = 49</b> → x = 7 (and also −7).`,
+        tip:`💡 Tip: factorizing is expanding done backwards — you can always check your answer by expanding it again to see if you get back to the original expression.`
+    },
+    graphs:{
+        intro:`<p>A straight-line graph is written as <b>y = mx + c</b>, where <b>m</b> is the <b>gradient</b> (how steep the line is / rate of change) and <b>c</b> is the <b>y-intercept</b> (where the line crosses the y-axis, when x = 0).</p>`,
+        formula:`Gradient: m = (y₂ − y₁) ÷ (x₂ − x₁)<br>Straight line equation: y = mx + c`,
+        example:`<b>Gradient</b> between (1; 2) and (3; 8): m = (8−2) ÷ (3−1) = 6 ÷ 2 = 3.<br><b>Finding y when x=4</b> for y = 2x + 1: y = 2(4) + 1 = 9.`,
+        tip:`💡 Tip: a positive gradient means the line goes up left-to-right; a negative gradient means it goes down. The bigger the number, the steeper the line.`
+    }
+};
+
+const QUESTIONS_PER_LEVEL = 5;
+const PASS_SCORE = 3;
+
+/* ---------- state ---------- */
+
+let student="";
+let xp=0;
+let hearts=5;
+let progress={};
+let currentTopic=null;
+let currentLevel=0;
+let currentQuestion=0;
+let score=0;
+let questions=[];
+
+function defaultProgress(){
+    const p={};
+    topics.forEach(t=>{
+        p[t.id]={
+            unlocked:t.levels.map((l,i)=>i===0),
+            completed:t.levels.map(()=>false)
+        };
+    });
+    return p;
+}
+
+function loadState(){
+    try{
+        const raw=localStorage.getItem('mathsphere_grade9');
+        if(raw){
+            const data=JSON.parse(raw);
+            student=data.student||"";
+            xp=data.xp||0;
+            progress=data.progress||defaultProgress();
+            topics.forEach(t=>{ if(!progress[t.id]) progress[t.id]={unlocked:t.levels.map((l,i)=>i===0),completed:t.levels.map(()=>false)}; });
+            return true;
+        }
+    }catch(e){}
+    progress=defaultProgress();
+    return false;
+}
+
+function saveState(){
+    try{
+        localStorage.setItem('mathsphere_grade9', JSON.stringify({student,xp,progress}));
+    }catch(e){}
+}
+
+/* ---------- navigation ---------- */
+
+function startJourney(){
+    const nameField=document.getElementById("studentName").value.trim();
+    if(!nameField){
+        alert("Enter your name");
+        return;
+    }
+    student=nameField;
+    saveState();
+    document.getElementById("welcome").classList.add("hidden");
+    showTopics();
+}
+
+function showTopics(){
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("topicScreen").classList.remove("hidden");
+
+    document.getElementById("welcomeUserTopics").innerHTML="👤 "+student;
+    document.getElementById("xpDisplayTopics").innerHTML="⭐ "+xp+" XP";
+
+    let html="";
+    topics.forEach(t=>{
+        const completedCount = progress[t.id].completed.filter(Boolean).length;
+        html+=`
+        <button class="topicCard" onclick="openTopic('${t.id}')">
+            <span class="icon">${t.icon}</span>
+            ${t.title}
+            <span class="sub">${completedCount}/${t.levels.length} levels · ${t.desc}</span>
+        </button>`;
+    });
+    document.getElementById("topicGrid").innerHTML=html;
+}
+
+function openTopic(topicId){
+    currentTopic=topicId;
+    showPath();
+}
+
+function showPath(){
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("topicScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("pathScreen").classList.remove("hidden");
+
+    const topic = topics.find(t=>t.id===currentTopic);
+    document.getElementById("welcomeUser").innerHTML="👤 "+student;
+    document.getElementById("xpDisplay").innerHTML="⭐ "+xp+" XP";
+    document.getElementById("pathTitle").innerHTML=topic.icon+" "+topic.title;
+
+    const p = progress[topic.id];
+    let html=`<button class="level learnBtn path-item" onclick="showLearn('${topic.id}')">📖 Learn This Topic First</button>`;
+    topic.levels.forEach((l,index)=>{
+        if(p.unlocked[index]){
+            html+=`
+            <button class="level path-item" onclick="startLevel(${index})">
+                ${p.completed[index] ? '✅' : '🔵'} Level ${index+1} - ${l.title}
+            </button>`;
+        }else{
+            html+=`
+            <button class="locked path-item">
+                🔒 Level ${index+1} - ${l.title}
+            </button>`;
+        }
+    });
+    document.getElementById("path").innerHTML=html;
+}
+
+function showLearn(topicId){
+    currentTopic=topicId;
+    const topic = topics.find(t=>t.id===topicId);
+    const lesson = tutorials[topicId];
+
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.remove("hidden");
+
+    document.getElementById("learnTitle").innerHTML=topic.icon+" "+topic.title;
+    document.getElementById("learnBody").innerHTML=`
+        ${lesson.intro}
+        <div class="formulaBox">${lesson.formula}</div>
+        <div class="exampleBox">${lesson.example}</div>
+        <div class="tipBox">${lesson.tip}</div>
+    `;
+}
+
+/* ---------- quiz flow ---------- */
+
+function startLevel(level){
+    currentLevel=level;
+    currentQuestion=0;
+    score=0;
+    hearts=5;
+
+    const topic = topics.find(t=>t.id===currentTopic);
+    questions=[];
+    for(let i=0;i<QUESTIONS_PER_LEVEL;i++){
+        questions.push(topic.levels[level].gen());
+    }
+
+    document.getElementById("pathScreen").classList.add("hidden");
+    document.getElementById("learnScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.remove("hidden");
+
+    loadQuestion();
+}
+
+function retryLevel(){
+    startLevel(currentLevel);
+}
+
+function loadQuestion(){
+    const q = questions[currentQuestion];
+
+    document.getElementById("xpTop").innerHTML="⭐ "+xp+" XP";
+    document.getElementById("quizHearts").innerHTML="❤️".repeat(hearts);
+    document.getElementById("questionCounter").innerHTML=(currentQuestion+1)+"/"+questions.length;
+    document.getElementById("questionText").innerHTML=q.question;
+
+    document.getElementById("progressFill").style.width=((currentQuestion)/questions.length*100)+"%";
+
+    const explainBox = document.getElementById("explainBox");
+    explainBox.style.display="none";
+    explainBox.innerHTML="";
+    document.getElementById("continueBtn").style.display="none";
+
+    let html="";
+    q.options.forEach((o,i)=>{
+        html+=`<button class="option" onclick="answer(${i},this)">${o}</button>`;
+    });
+    document.getElementById("options").innerHTML=html;
+}
+
+function answer(choice,btn){
+    const q = questions[currentQuestion];
+    const buttons = document.querySelectorAll(".option");
+    buttons.forEach(b=>b.disabled=true);
+
+    if(choice===q.answer){
+        btn.classList.add("correct");
+        score++;
+        xp+=10;
+    }else{
+        btn.classList.add("wrong");
+        buttons[q.answer].classList.add("correct");
+        hearts--;
+    }
+
+    const explainBox = document.getElementById("explainBox");
+    explainBox.innerHTML="💡 "+q.explain;
+    explainBox.style.display="block";
+
+    document.getElementById("quizHearts").innerHTML="❤️".repeat(Math.max(hearts,0));
+    document.getElementById("xpTop").innerHTML="⭐ "+xp+" XP";
+    saveState();
+
+    document.getElementById("continueBtn").style.display="block";
+}
+
+function proceed(){
+    document.getElementById("continueBtn").style.display="none";
+
+    if(hearts<=0){
+        failLevel();
+        return;
+    }
+
+    currentQuestion++;
+    if(currentQuestion<questions.length){
+        loadQuestion();
+    }else{
+        completeLevel();
+    }
+}
+
+function failLevel(){
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
+
+    document.getElementById("resultHeading").innerHTML="💔 Out Of Hearts";
+    document.getElementById("resultScore").innerHTML=score+" / "+questions.length+" Correct";
+    document.getElementById("grade").innerHTML="";
+    document.getElementById("percentage").innerHTML="";
+    document.getElementById("resultBadge").innerHTML="Give it another go — you've got this! 💪<br><br>⭐ XP so far: "+xp;
+    document.getElementById("retryBtn").innerHTML="Try Again";
+}
+
+function completeLevel(){
+    const topic = topics.find(t=>t.id===currentTopic);
+    const total = questions.length;
+    const percent = Math.round((score/total)*100);
+
+    let grade="F";
+    if(percent>=80) grade="A";
+    else if(percent>=70) grade="B";
+    else if(percent>=60) grade="C";
+    else if(percent>=50) grade="D";
+
+    const passed = score>=PASS_SCORE;
+    if(passed){
+        progress[topic.id].completed[currentLevel]=true;
+        if(currentLevel+1<topic.levels.length){
+            progress[topic.id].unlocked[currentLevel+1]=true;
+        }
+    }
+    saveState();
+
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
+
+    document.getElementById("resultHeading").innerHTML = passed ? "🏆 Level Complete" : "📚 Almost There";
+    document.getElementById("resultScore").innerHTML=score+" / "+total+" Correct";
+    document.getElementById("grade").innerHTML=grade;
+    document.getElementById("percentage").innerHTML=percent+"%";
+
+    let badge="📚 Keep Practicing";
+    if(!passed) badge="Score "+PASS_SCORE+"/"+total+" or more to unlock the next level. Try again!";
+    else if(grade==="A") badge="🏆 Topic Master";
+    else if(grade==="B") badge="🥈 Topic Expert";
+    else badge="✅ Level Passed";
+
+    document.getElementById("resultBadge").innerHTML=badge+"<br><br>⭐ XP: "+xp;
+    document.getElementById("retryBtn").innerHTML="Try Again";
+}
+
+/* ---------- init ---------- */
+
+loadState();
+if(student){
+    document.getElementById("studentName").value=student;
+}
+</script>
+
+</body>
+</html>
