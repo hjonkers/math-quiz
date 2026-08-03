@@ -1,136 +1,173 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MathSphere AI</title>
-<style>
-
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:linear-gradient(135deg,#4c8bf5,#8a4cf5);
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.container{
-    max-width:520px;
-    width:100%;
-    padding:20px;
-}
-
-.card{
-    background:white;
-    border-radius:20px;
-    padding:30px 24px;
-    box-shadow:0 10px 30px rgba(0,0,0,.2);
-    text-align:center;
-}
-
-h1{
-    margin-top:0;
-    font-size:32px;
-}
-
-h3{
-    color:#666;
-    font-weight:normal;
-    margin-top:0;
-}
-
-.gradeLink{
-    display:block;
-    text-decoration:none;
-    border-radius:16px;
-    padding:20px;
-    margin-top:16px;
-    text-align:left;
-    transition:transform .15s;
-}
-
-.gradeLink:active{
-    transform:scale(0.98);
-}
-
-.grade6{
-    background:#eef4ff;
-    color:#2854a3;
-}
-
-.grade8{
-    background:#f2ecff;
-    color:#5b2ca3;
-}
-
-.grade9{
-    background:#fff1ea;
-    color:#a34a1e;
-}
-
-.grade10{
-    background:#e6f7f1;
-    color:#0e6d54;
-}
-
-.cheatsheet{
-    background:#fff8e1;
-    color:#8a6d00;
-}
-
-.gradeLink .title{
-    font-size:20px;
-    font-weight:bold;
-    display:block;
-}
-
-.gradeLink .sub{
-    font-size:14px;
-    opacity:0.8;
-    display:block;
-    margin-top:4px;
-}
-
-</style>
+<title>MathSpark — WCED CAPS Mathematics, Grades 6–10</title>
+<meta name="description" content="Learn, practice, and master WCED CAPS Mathematics for Grades 6–10. Interactive quizzes, formula library, and instant marking.">
+<link rel="icon" href="images/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
 
-<div class="container">
-<div class="card">
-<h1>🧮 MathSphere AI</h1>
-<h3>Pick your grade to start learning</h3>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <img src="images/logo.svg" alt="">
+      Math<span class="spark">Spark</span>
+    </a>
 
-<a class="gradeLink grade6" href="grade6.html">
-<span class="title">📏 Grade 6</span>
-<span class="sub">Perimeter, Area, Volume &amp; Length</span>
-</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="#grades">Grades</a></li>
+      <li><a href="cheatsheet.html">Formula Library</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
 
-<a class="gradeLink grade8" href="grade8.html">
-<span class="title">➕ Grade 8</span>
-<span class="sub">Integers, Exponents &amp; Algebra Basics</span>
-</a>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">🌞</button>
+      <span class="btn-login" title="Accounts &amp; saved progress are coming in a future version">Login<span class="badge-soon">SOON</span></span>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><span></span></button>
+    </div>
+  </div>
+</nav>
 
-<a class="gradeLink grade9" href="grade9.html">
-<span class="title">📈 Grade 9</span>
-<span class="sub">Numbers, Patterns, Algebra &amp; Graphs (Paper 1)</span>
-</a>
+<header class="hero">
+  <img src="images/logo.svg" alt="MathSpark logo" class="hero-logo">
+  <h1>Math<span class="spark">Spark</span></h1>
+  <p class="hero-tagline">Learn &nbsp;•&nbsp; Practice &nbsp;•&nbsp; Master</p>
+  <p class="hero-sub">WCED CAPS Mathematics for Grades 6–10 — interactive quizzes, formula references, and instant marking.</p>
+  <div class="hero-actions">
+    <a href="#grades" class="btn btn-primary">🚀 Start Learning</a>
+    <a href="cheatsheet.html" class="btn btn-secondary">🧮 Formula Library</a>
+  </div>
+</header>
 
-<a class="gradeLink grade10" href="grade10.html">
-<span class="title">📐 Grade 10</span>
-<span class="sub">Trigonometry, Statistics, Probability &amp; Finance</span>
-</a>
+<section class="section" id="grades">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Choose your grade</span>
+      <h2>Pick up right where your class is</h2>
+      <p>Each grade is aligned to the WCED CAPS curriculum.</p>
+    </div>
 
-<a class="gradeLink cheatsheet" href="cheatsheet.html">
-<span class="title">📋 Formula Cheat Sheet</span>
-<span class="sub">All grades' key formulas in one place</span>
-</a>
+    <div class="grade-grid">
+      <a href="grade6.html" class="grade-card">
+        <div class="num">6</div>
+        <div class="label">Grade 6</div>
+        <div class="topics">Perimeter, Area, Volume &amp; Length</div>
+      </a>
 
-<a href="dashboard.html" style="display:block;text-align:center;margin-top:20px;font-size:13px;color:#999;text-decoration:none">Admin Dashboard →</a>
+      <div class="grade-card disabled" aria-disabled="true">
+        <div class="num">7</div>
+        <div class="label">Grade 7</div>
+        <div class="topics">In development</div>
+        <span class="tag-soon">COMING SOON</span>
+      </div>
 
-</div>
-</div>
+      <a href="grade8.html" class="grade-card">
+        <div class="num">8</div>
+        <div class="label">Grade 8</div>
+        <div class="topics">Integers, Exponents &amp; Algebra Basics</div>
+      </a>
 
+      <a href="grade9.html" class="grade-card">
+        <div class="num">9</div>
+        <div class="label">Grade 9</div>
+        <div class="topics">Numbers, Patterns, Algebra &amp; Graphs</div>
+      </a>
+
+      <a href="grade10.html" class="grade-card">
+        <div class="num">10</div>
+        <div class="label">Grade 10</div>
+        <div class="topics">Trigonometry, Statistics, Probability &amp; Finance</div>
+      </a>
+    </div>
+
+    <div class="path-teaser" aria-hidden="true">
+      <div class="path-node active" style="background:var(--blue)">6</div>
+      <div class="path-connector"></div>
+      <div class="path-node" style="background:var(--border); color:var(--text-muted)">7</div>
+      <div class="path-connector"></div>
+      <div class="path-node" style="background:var(--green)">8</div>
+      <div class="path-connector"></div>
+      <div class="path-node" style="background:var(--green)">9</div>
+      <div class="path-connector"></div>
+      <div class="path-node" style="background:var(--orange)">10</div>
+    </div>
+  </div>
+</section>
+
+<section class="section features">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Why MathSpark</span>
+      <h2>Built for how you actually study</h2>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-item">
+        <div class="feature-icon" style="background:var(--blue)">✓</div>
+        <div><h4>CAPS Aligned</h4><p>Every question maps to the WCED CAPS syllabus.</p></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background:var(--green)">📝</div>
+        <div><h4>Practice Questions</h4><p>Work through quizzes for each grade at your own pace.</p></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background:var(--orange)">⚡</div>
+        <div><h4>Instant Marking</h4><p>Know immediately what you got right — and why.</p></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background:var(--blue)">🧮</div>
+        <div><h4>Formula Sheets</h4><p>A quick-reference cheat sheet for every grade's key formulas.</p></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background:var(--text-muted)">🎥</div>
+        <div><h4>Video Lessons<span class="badge-soon">SOON</span></h4><p>Short, worked-example videos for tricky topics.</p></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background:var(--text-muted)">🤖</div>
+        <div><h4>AI Tutor<span class="badge-soon">SOON</span></h4><p>Ask a question, get a step-by-step explanation.</p></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background:var(--text-muted)">🏆</div>
+        <div><h4>XP &amp; Achievements<span class="badge-soon">SOON</span></h4><p>Earn XP, unlock badges, and keep a streak going.</p></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background:var(--text-muted)">🎯</div>
+        <div><h4>Tests &amp; Exams<span class="badge-soon">SOON</span></h4><p>Full-length timed practice papers.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="container" style="max-width:720px">
+    <div class="section-head">
+      <span class="eyebrow">FAQ &amp; Contact</span>
+      <h2>Questions?</h2>
+      <p>MathSpark is a free, independent study tool — not affiliated with the WCED. Found a bug, or want a topic added? <a href="mailto:hilton.jonkers@gmail.com" style="color:var(--blue); font-weight:600;">Send feedback →</a></p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-links">
+    <a href="#faq">About</a>
+    <a href="#faq">FAQ</a>
+    <a href="#faq">Privacy</a>
+    <a href="#faq">Terms</a>
+    <a href="mailto:hilton.jonkers@gmail.com">Feedback</a>
+    <a href="https://github.com/hjonkers/math-quiz" target="_blank" rel="noopener">GitHub</a>
+  </div>
+  <p class="footer-copy">© 2026 MathSpark</p>
+</footer>
+
+<script src="js/app.js"></script>
 </body>
 </html>
